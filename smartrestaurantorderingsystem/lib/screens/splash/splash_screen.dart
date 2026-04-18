@@ -4,56 +4,38 @@ import '../../providers/session_provider.dart';
 import '../qr/qr_scanner_screen.dart';
 import '../menu/menu_screen.dart';
 
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
 
-class _SplashScreenState extends ConsumerState<SplashScreen> {
-
-  @override
-  void initState() {
-    super.initState();
-
-    Future.microtask(() => checkSession());
-  }
-
-  void checkSession() {
-    final sessionState = ref.read(sessionProvider);
-
-    sessionState.when(
-      data: (session) {
-        if (session != null) {
-          // Session exists → go to Menu
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MenuScreen()),
-          );
-        } else {
-          // No session → go to QR
+    // ✅ Correct place for listen
+    ref.listen(sessionProvider, (previous, next) {
+      next.when(
+        data: (session) {
+          if (session != null) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const MenuScreen()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const QRScannerScreen()),
+            );
+          }
+        },
+        loading: () {},
+        error: (_, __) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const QRScannerScreen()),
           );
-        }
-      },
-      loading: () {
-        // still loading → do nothing
-      },
-      error: (e, _) {
-        // fallback → QR screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const QRScannerScreen()),
-        );
-      },
-    );
-  }
+        },
+      );
+    });
 
-  @override
-  Widget build(BuildContext context) {
     final sessionState = ref.watch(sessionProvider);
 
     return Scaffold(
