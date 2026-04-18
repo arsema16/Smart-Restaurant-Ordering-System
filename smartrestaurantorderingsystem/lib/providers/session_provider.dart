@@ -42,18 +42,28 @@ class SessionNotifier extends StateNotifier<AsyncValue<SessionModel?>> {
 
   /// Create new session (after QR scan)
   Future<void> createSession(String tableId) async {
-    state = const AsyncLoading();
+  state = const AsyncLoading();
 
-    try {
-      final session = await repo.createSession(tableId);
+  try {
+    final data = await repo.startSession(tableId);
 
-      await storage.saveSession(session.sessionId, session.tableId);
+    final sessionId = data['session_id'];
+    final tableIdFromApi = data['table_id'];
 
-      state = AsyncData(session);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+    final session = SessionModel(
+      sessionId: sessionId,
+      tableId: tableIdFromApi,
+    );
+
+    // ✅ FIXED HERE
+    await storage.saveSession(sessionId, tableIdFromApi);
+
+    state = AsyncData(session);
+
+  } catch (e, st) {
+    state = AsyncError(e, st);
   }
+}
 
   /// Clear session (optional)
   Future<void> clearSession() async {

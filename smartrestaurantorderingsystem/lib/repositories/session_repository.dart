@@ -10,4 +10,7 @@ class SessionRepository {
     final data = await api.startSession(tableId);
     return SessionModel.fromJson(data);
   }
+  Future<Map<String, dynamic>> startSession(String tableId) {
+  return api.startSession(tableId);
+}
 }
