@@ -32,10 +32,27 @@ httpx = "^0.26.0"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--asyncio-mode=auto",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "e2e: End-to-end tests",
+    "property: Property-based tests",
+]
 
 [tool.hypothesis]
 max_examples = 200
 deadline = 5000
+derandomize = false
+print_blob = true
 
 [build-system]
 requires = ["poetry-core"]

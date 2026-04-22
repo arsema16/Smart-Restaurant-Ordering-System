@@ -19,14 +19,14 @@ The implementation follows a layered approach: database models → core services
   - Set up Docker Compose with PostgreSQL 15, Redis 7, and FastAPI service
   - _Requirements: 10.1, 10.4_
 
-- [ ]* 1.1 Set up testing infrastructure
+- [x] 1.1 Set up testing infrastructure
   - Configure pytest with asyncio mode and Hypothesis settings (200 examples)
   - Create test fixtures for database session, Redis client, and test client
   - Create test directory structure (`tests/unit/`, `tests/integration/`, `tests/e2e/`)
   - _Requirements: 10.1_
 
 - [ ] 2. Implement database models and migrations
-  - [ ] 2.1 Create SQLAlchemy models
+  - [x] 2.1 Create SQLAlchemy models
     - Create `app/models/table_session.py` with TableSession model (id, table_identifier, session_token, persistent_user_id, created_at, last_active_at, is_active)
     - Create `app/models/menu_item.py` with MenuItem model (id, name, category, price, prep_time_minutes, is_available, updated_at)
     - Create `app/models/cart.py` with CartItem model (id, session_id FK, menu_item_id FK, quantity, added_at)
