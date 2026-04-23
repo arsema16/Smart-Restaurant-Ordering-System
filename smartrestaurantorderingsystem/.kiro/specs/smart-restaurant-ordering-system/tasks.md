@@ -87,8 +87,8 @@ The implementation follows a layered approach: database models → core services
     - Test session access from different device with same token
     - _Requirements: 1.3, 1.4, 1.6_
 
-- [ ] 5. Implement menu service
-  - [ ] 5.1 Create menu service with CRUD operations
+- [x] 5. Implement menu service
+  - [x] 5.1 Create menu service with CRUD operations
     - Create `app/services/menu_service.py`
     - Implement `get_menu_grouped_by_category()` → returns MenuGroupedResponse
     - Implement `get_menu_item(item_id)` → returns MenuItem or 404
