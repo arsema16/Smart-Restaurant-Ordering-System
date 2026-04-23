@@ -11,6 +11,14 @@ from alembic import context
 from app.database import Base
 from app.config import settings
 
+# Import all models so Alembic can detect them
+from app.models.table_session import TableSession
+from app.models.menu_item import MenuItem
+from app.models.cart import CartItem
+from app.models.order import Order, OrderItem
+from app.models.user_profile import UserProfile
+from app.models.staff_user import StaffUser
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

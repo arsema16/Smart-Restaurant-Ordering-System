@@ -35,13 +35,13 @@ The implementation follows a layered approach: database models → core services
     - Create `app/models/staff_user.py` with StaffUser model (id, username, hashed_password, role, is_active)
     - _Requirements: 1.1, 1.2, 1.5, 2.1, 3.1, 4.1, 7.1, 9.1_
 
-  - [ ] 2.2 Create Alembic migrations
+  - [x] 2.2 Create Alembic migrations
     - Initialize Alembic with `alembic init alembic`
     - Create migration for all tables with indexes and constraints
     - Add unique constraints, foreign keys, and check constraints as per design DDL
     - _Requirements: 9.4, 10.1_
 
-  - [ ]* 2.3 Write property test for session token uniqueness
+  - [x] 2.3 Write property test for session token uniqueness
     - **Property 1: Session Token Uniqueness**
     - **Validates: Requirements 1.1, 1.2, 1.5**
     - Generate multiple session tokens and verify all are unique
@@ -53,7 +53,7 @@ The implementation follows a layered approach: database models → core services
     - Test CartItem quantity validation (must be positive)
     - _Requirements: 9.2, 9.3_
 
-- [ ] 3. Implement Pydantic schemas
+- [x] 3. Implement Pydantic schemas
   - Create `app/schemas/session.py` with SessionCreateRequest, SessionCreateResponse, SessionStateResponse
   - Create `app/schemas/menu.py` with MenuItemResponse, MenuItemCreate, MenuItemUpdate, MenuGroupedResponse
   - Create `app/schemas/cart.py` with CartItemAdd, CartItemUpdate, CartResponse, CartItemDetail
