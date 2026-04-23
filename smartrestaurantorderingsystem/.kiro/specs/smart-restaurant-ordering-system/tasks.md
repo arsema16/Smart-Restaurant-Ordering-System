@@ -117,7 +117,7 @@ The implementation follows a layered approach: database models → core services
     - **Validates: Requirements 9.1, 9.4**
     - Create menu item, read it back, verify all fields preserved
 
-- [ ] 6. Checkpoint - Ensure database and core services work
+- [x] 6. Checkpoint - Ensure database and core services work
   - Run migrations against test database
   - Run all property tests and unit tests for models, schemas, session service, menu service
   - Ensure all tests pass, ask the user if questions arise
