@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/session_provider.dart';
 import '../menu/menu_screen.dart';
+import '../welcome/welcome_screen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   final String? tableIdentifier;
@@ -43,77 +44,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           MaterialPageRoute(builder: (_) => const MenuScreen()),
         );
       } else {
-        // No session and no table ID, show error
-        _showNoSessionError();
+        // No session and no table ID, show welcome screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+        );
       }
     } catch (e) {
       if (!mounted) return;
-      _showError(e.toString());
+      // On error, show welcome screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+      );
     }
   }
-
-  void _showNoSessionError() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('No Table Selected'),
-        content: const Text(
-          'Please scan the QR code on your table to start ordering.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showError(String error) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text('Failed to initialize session: $error'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.restaurant,
-              size: 80,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Smart Restaurant',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 48),
-            const CircularProgressIndicator(),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
   @override
   Widget build(BuildContext context) {

@@ -13,8 +13,10 @@ class _QRGeneratorScreenState extends State<QRGeneratorScreen> {
   final TextEditingController _tableController = TextEditingController();
   String? _generatedUrl;
 
-  // Base URL of your web app (update with actual domain)
-  static const String baseUrl = 'https://restaurant.com';
+  // Base URL of your web app
+  // For local development, use your local IP address
+  // For production, use your actual domain
+  static const String baseUrl = 'http://localhost:8080'; // Change this to your actual URL
 
   void _generateQRCode() {
     final tableId = _tableController.text.trim();
@@ -81,6 +83,36 @@ class _QRGeneratorScreenState extends State<QRGeneratorScreen> {
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: SelectableText(
+                          _generatedUrl!,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Instructions:',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '1. Print this QR code\n'
+                        '2. Place it on the table\n'
+                        '3. Guests scan with phone camera\n'
+                        '4. App opens automatically',
+                        style: TextStyle(fontSize: 14),
                       ),
                     ],
                   ),
