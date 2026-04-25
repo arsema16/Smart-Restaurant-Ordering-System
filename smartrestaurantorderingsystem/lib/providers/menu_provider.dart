@@ -1,11 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../core/services/api_service.dart';
 import '../models/menu_item_model.dart';
-final apiServiceProvider = Provider((ref) => ApiService());
-final menuProvider = FutureProvider<List<MenuItem>>((ref) async {
-  final api = ref.watch(apiServiceProvider);
 
-  final data = await api.fetchMenu();
+/// Menu state notifier
+class MenuNotifier extends StateNotifier<MenuGroupedResponse?> {
+  MenuNotifier() : super(null);
 
-  return data.map<MenuItem>((e) => MenuItem.fromJson(e)).toList();
+  /// Update menu with response from API
+  void updateMenu(MenuGroupedResponse menu) {
+    state = menu;
+  }
+
+  /// Get all items as flat list
+  List<MenuItemResponse> get allItems {
+    if (state == null) return [];
+    return state!.categories.values.expand((items) => items).toList();
+  }
+
+  /// Get items by category
+  List<MenuItemResponse> getItemsByCategory(String category) {
+    return state?.categories[category] ?? [];
+  }
+}
+
+final menuProvider = StateNotifierProvider<MenuNotifier, MenuGroupedResponse?>((ref) {
+  return MenuNotifier();
 });

@@ -1,17 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../core/services/api_service.dart';
-import '../models/menu_item_model.dart';
-import 'session_provider.dart';
+import '../models/recommendation_model.dart';
 
-final recommendationProvider =
-    FutureProvider<List<MenuItem>>((ref) async {
-  final api = ref.watch(apiServiceProvider);
-  final session = ref.watch(sessionProvider).value;
+/// Recommendation state notifier
+class RecommendationNotifier extends StateNotifier<RecommendationResponse?> {
+  RecommendationNotifier() : super(null);
 
-  if (session == null) return [];
+  /// Update recommendations with response from API
+  void updateRecommendations(RecommendationResponse recommendations) {
+    state = recommendations;
+  }
 
-  final data =
-      await api.getRecommendations(session.sessionId);
-print("Recommendation API called");
-  return data.map<MenuItem>((e) => MenuItem.fromJson(e)).toList();
+  /// Clear recommendations
+  void clearRecommendations() {
+    state = null;
+  }
+
+  /// Get recommended items
+  List<RecommendedItem> get items => state?.recommendations ?? [];
+}
+
+final recommendationProvider = StateNotifierProvider<RecommendationNotifier, RecommendationResponse?>((ref) {
+  return RecommendationNotifier();
 });

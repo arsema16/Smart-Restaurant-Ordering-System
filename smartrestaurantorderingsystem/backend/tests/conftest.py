@@ -14,7 +14,8 @@ from app.redis_client import get_redis
 from app.config import settings
 
 # Test database URL (use a separate test database)
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", settings.database_url.replace("/restaurant_db", "/restaurant_test_db"))
+# Force PostgreSQL for testing (SQLite doesn't support JSONB)
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", "postgresql+asyncpg://postgres:1234@localhost:5432/restaurant_test_db")
 TEST_REDIS_URL = os.getenv("TEST_REDIS_URL", "redis://localhost:6379/15")
 
 

@@ -11,7 +11,7 @@ async def create_test_database():
             host='localhost',
             port=5432,
             user='postgres',
-            password='admin',
+            password='1234',
             database='postgres'
         )
         

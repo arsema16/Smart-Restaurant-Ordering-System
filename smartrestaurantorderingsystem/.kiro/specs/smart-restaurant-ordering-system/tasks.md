@@ -336,13 +336,13 @@ The implementation follows a layered approach: database models → core services
     - Test session state round-trip (Property 21)
     - _Requirements: 10.1, 10.2, 10.5_
 
-- [ ] 15. Checkpoint - Ensure backend is fully functional
+- [x] 15. Checkpoint - Ensure backend is fully functional
   - Run all property tests, unit tests, and integration tests
   - Test API endpoints with curl or Postman
   - Test WebSocket connections with wscat
   - Ensure all tests pass, ask the user if questions arise
 
-- [ ] 16. Set up frontend project structure
+- [x] 16. Set up frontend project structure
   - Create React 18 + TypeScript project with Vite
   - Set up directory structure (`src/components/`, `src/services/`, `src/hooks/`, `src/types/`)
   - Install dependencies (react-router-dom, axios, zustand for state, socket.io-client for WebSocket)

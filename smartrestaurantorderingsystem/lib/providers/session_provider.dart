@@ -1,81 +1,33 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/session_model.dart';
-import '../repositories/session_repository.dart';
-import '../core/services/api_service.dart';
-import '../core/services/storage_service.dart';
 
-final apiServiceProvider = Provider((ref) => ApiService());
+/// Session state notifier
+class SessionNotifier extends StateNotifier<SessionCreateResponse?> {
+  SessionNotifier() : super(null);
 
-final storageServiceProvider = Provider((ref) => StorageService());
-
-final sessionRepositoryProvider = Provider((ref) {
-  final api = ref.watch(apiServiceProvider);
-  return SessionRepository(api);
-});
-
-class SessionNotifier extends StateNotifier<AsyncValue<SessionModel?>> {
-  final SessionRepository repo;
-  final StorageService storage;
-
-  SessionNotifier(this.repo, this.storage) : super(const AsyncLoading()) {
-    loadSession();
+  /// Update session with response from API
+  void updateSession(SessionCreateResponse session) {
+    state = session;
   }
 
-  /// Load existing session from local storage
-  Future<void> loadSession() async {
-    try {
-      final data = await storage.getSession();
-      final sessionId = data["session_id"];
-      final tableId = data["table_id"];
-
-      if (sessionId != null && tableId != null) {
-        state = AsyncData(
-          SessionModel(sessionId: sessionId, tableId: tableId),
-        );
-      } else {
-        state = const AsyncData(null);
-      }
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+  /// Clear session
+  void clearSession() {
+    state = null;
   }
 
-  /// Create new session (after QR scan)
-  Future<void> createSession(String tableId) async {
-  state = const AsyncLoading();
+  /// Check if session exists
+  bool get hasSession => state != null;
 
-  try {
-    final data = await repo.startSession(tableId);
+  /// Get session ID
+  String? get sessionId => state?.sessionId;
 
-    final sessionId = data['session_id'];
-    final tableIdFromApi = data['table_id'];
+  /// Get session token
+  String? get sessionToken => state?.sessionToken;
 
-    final session = SessionModel(
-      sessionId: sessionId,
-      tableId: tableIdFromApi,
-    );
-
-    // ✅ FIXED HERE
-    await storage.saveSession(sessionId, tableIdFromApi);
-
-    state = AsyncData(session);
-
-  } catch (e, st) {
-    state = AsyncError(e, st);
-  }
+  /// Get table identifier
+  String? get tableIdentifier => state?.tableIdentifier;
 }
 
-  /// Clear session (optional)
-  Future<void> clearSession() async {
-    await storage.clearSession();
-    state = const AsyncData(null);
-  }
-}
-
-final sessionProvider =
-    StateNotifierProvider<SessionNotifier, AsyncValue<SessionModel?>>((ref) {
-  final repo = ref.watch(sessionRepositoryProvider);
-  final storage = ref.watch(storageServiceProvider);
-
-  return SessionNotifier(repo, storage);
+final sessionProvider = StateNotifierProvider<SessionNotifier, SessionCreateResponse?>((ref) {
+  return SessionNotifier();
 });
