@@ -1,16 +1,20 @@
-import '../core/services/api_service.dart';
+import '../services/api_service.dart';
 import '../models/session_model.dart';
 
 class SessionRepository {
-  final ApiService api;
+  final ApiService _api;
 
-  SessionRepository(this.api);
+  SessionRepository(this._api);
 
-  Future<SessionModel> createSession(String tableId) async {
-    final data = await api.startSession(tableId);
-    return SessionModel.fromJson(data);
+  /// Create or resume a session
+  Future<SessionCreateResponse> createSession(SessionCreateRequest request) async {
+    final response = await _api.post('/sessions', data: request.toJson());
+    return SessionCreateResponse.fromJson(response.data);
   }
-  Future<Map<String, dynamic>> startSession(String tableId) {
-  return api.startSession(tableId);
-}
+
+  /// Get full session state
+  Future<SessionStateResponse> getSessionState(String sessionId) async {
+    final response = await _api.get('/sessions/$sessionId');
+    return SessionStateResponse.fromJson(response.data);
+  }
 }

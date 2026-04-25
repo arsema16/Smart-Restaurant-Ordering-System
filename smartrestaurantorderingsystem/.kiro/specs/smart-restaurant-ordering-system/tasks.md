@@ -351,28 +351,28 @@ The implementation follows a layered approach: database models → core services
   - Create `src/types/` with TypeScript interfaces matching backend Pydantic schemas
   - _Requirements: 2.1, 6.1, 10.4_
 
-- [ ] 17. Implement guest UI components
-  - [ ] 17.1 Create QR scan and session initialization
+- [x] 17. Implement guest UI components
+  - [x] 17.1 Create QR scan and session initialization
     - Create `src/pages/QRScanPage.tsx` with QR code scanner (use `react-qr-reader`)
     - On scan, call POST /sessions, store session_token in localStorage
     - Create `src/hooks/useSession.ts` to manage session state and token
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 17.2 Create menu browsing UI
+  - [x] 17.2 Create menu browsing UI
     - Create `src/pages/MenuPage.tsx` with category tabs and item cards
     - Display item name, price, prep time, availability status
     - Disable "Add to Cart" button for unavailable items
     - Call GET /menu on mount
     - _Requirements: 2.1, 2.2, 2.3_
 
-  - [ ] 17.3 Create cart UI
+  - [x] 17.3 Create cart UI
     - Create `src/components/Cart.tsx` with item list, quantity controls, total price
     - Implement add, update, remove item actions calling cart API endpoints
     - Disable "Place Order" button when cart is empty
     - Show notification when unavailable item is removed from cart
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-  - [ ] 17.4 Create order placement and tracking UI
+  - [x] 17.4 Create order placement and tracking UI
     - Create `src/pages/OrdersPage.tsx` with order history and status tracking
     - Display order number, items, status, estimated wait time
     - Call POST /orders to place order
@@ -380,7 +380,7 @@ The implementation follows a layered approach: database models → core services
     - Implement reconnection logic with exponential backoff
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 6.1, 6.2, 6.3, 6.4, 6.5, 10.4_
 
-  - [ ] 17.5 Create recommendations UI
+  - [x] 17.5 Create recommendations UI
     - Create `src/components/Recommendations.tsx` with recommended item cards
     - Call GET /recommendations on menu page and cart page
     - Update recommendations when cart changes

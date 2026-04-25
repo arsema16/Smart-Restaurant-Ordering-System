@@ -4,16 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/menu_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/recommendation_provider.dart';
+import '../../models/menu_item_model.dart';
 import '../cart/cart_screen.dart';
+import '../../widgets/recommendation_widget.dart';
 
-class MenuScreen extends ConsumerWidget {
+class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends ConsumerState<MenuScreen> {
+  String? selectedCategory;
+
+  @override
+  Widget build(BuildContext context) {
     final menuAsync = ref.watch(menuProvider);
-    final recAsync = ref.watch(recommendationProvider);
-    final cart = ref.watch(cartProvider);
+    final cartAsync = ref.watch(cartProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,180 +40,173 @@ class MenuScreen extends ConsumerWidget {
                   );
                 },
               ),
-
-              // 🛒 Cart badge
-              if (cart.isNotEmpty)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      cart.length.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
+              // Cart badge
+              cartAsync.when(
+                data: (cart) {
+                  if (cart.items.isEmpty) return const SizedBox();
+                  return Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                  ),
-                ),
-            ],
-          )
-        ],
-      ),
-
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-            // 🔥 RECOMMENDATIONS (ONLY WHEN CART HAS ITEMS)
-            if (cart.isNotEmpty)
-              recAsync.when(
-                data: (recItems) {
-                  if (recItems.isEmpty) return const SizedBox();
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text(
-                          "🔥 Recommended for you",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      constraints: const BoxConstraints(
+                        minWidth: 20,
+                        minHeight: 20,
+                      ),
+                      child: Text(
+                        cart.items.length.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-
-                      ...recItems.map((item) {
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: Card(
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(12),
-                              title: Text(
-                                item.name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text("${item.price} ETB"),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.add_circle,
-                                  color: Colors.green,
-                                ),
-                                onPressed: () {
-                                  ref
-                                      .read(cartProvider.notifier)
-                                      .addItem(item);
-
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(
-                                    SnackBar(
-                                      content:
-                                          Text("${item.name} added"),
-                                      duration: const Duration(
-                                          milliseconds: 600),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
+                    ),
                   );
                 },
                 loading: () => const SizedBox(),
                 error: (_, __) => const SizedBox(),
               ),
+            ],
+          )
+        ],
+      ),
+      body: menuAsync.when(
+        data: (menu) {
+          final categories = menu.categories.keys.toList();
+          
+          // Set initial category if not set
+          if (selectedCategory == null && categories.isNotEmpty) {
+            selectedCategory = categories.first;
+          }
 
-            const Divider(),
+          return Column(
+            children: [
+              // Recommendations section
+              const RecommendationWidget(),
+              
+              const Divider(),
 
-            // 🍽 MENU TITLE
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                "🍽 Menu",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+              // Category tabs
+              if (categories.isNotEmpty)
+                Container(
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      final isSelected = category == selectedCategory;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: ChoiceChip(
+                          label: Text(category),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedCategory = category;
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
+
+              // Menu items for selected category
+              Expanded(
+                child: selectedCategory == null
+                    ? const Center(child: Text('No categories available'))
+                    : _buildMenuItems(menu.categories[selectedCategory] ?? []),
               ),
-            ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error loading menu: $error'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.read(menuProvider.notifier).loadMenu(),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-            // 🍽 MENU LIST
-            menuAsync.when(
-              data: (menu) {
-                final recItems = recAsync.value ?? [];
+  Widget _buildMenuItems(List<MenuItemResponse> items) {
+    if (items.isEmpty) {
+      return const Center(child: Text('No items in this category'));
+    }
 
-                // ❌ REMOVE DUPLICATES
-                final filteredMenu = menu.where((item) {
-                  return !recItems
-                      .any((rec) => rec.id == item.id);
-                }).toList();
+    return ListView.builder(
+      padding: const EdgeInsets.all(8),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return _buildMenuItem(item);
+      },
+    );
+  }
 
-                return Column(
-                  children: filteredMenu.map((item) {
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      child: Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 5),
-                        child: ListTile(
-                          title: Text(item.name),
-                          subtitle:
-                              Text("${item.price} ETB"),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              ref
-                                  .read(cartProvider.notifier)
-                                  .addItem(item);
-
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      "${item.name} added"),
-                                  duration: const Duration(
-                                      milliseconds: 600),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
-              loading: () => const Center(
-                  child: CircularProgressIndicator()),
-              error: (e, _) =>
-                  Center(child: Text("Error: $e")),
-            ),
+  Widget _buildMenuItem(MenuItemResponse item) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: ListTile(
+        title: Text(
+          item.name,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: item.isAvailable ? Colors.black : Colors.grey,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('\$${item.price.toStringAsFixed(2)}'),
+            Text('Prep time: ${item.prepTimeMinutes} min'),
+            if (!item.isAvailable)
+              const Text(
+                'Currently unavailable',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
           ],
         ),
+        trailing: ElevatedButton.icon(
+          onPressed: item.isAvailable
+              ? () => _addToCart(item)
+              : null,
+          icon: const Icon(Icons.add_shopping_cart, size: 18),
+          label: const Text('Add'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: item.isAvailable ? Colors.green : Colors.grey,
+            foregroundColor: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _addToCart(MenuItemResponse item) {
+    ref.read(cartProvider.notifier).addItem(item.id, 1);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${item.name} added to cart'),
+        duration: const Duration(seconds: 1),
       ),
     );
   }

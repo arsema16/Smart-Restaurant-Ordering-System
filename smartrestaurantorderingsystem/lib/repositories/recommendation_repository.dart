@@ -1,18 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smartrestaurantorderingsystem/providers/menu_provider.dart' hide apiServiceProvider;
-import 'package:smartrestaurantorderingsystem/providers/session_provider.dart';
-import '../core/services/api_service.dart';
-import '../models/menu_item_model.dart';
+import '../services/api_service.dart';
+import '../models/recommendation_model.dart';
 
-final recommendationProvider =
-    FutureProvider<List<MenuItem>>((ref) async {
-  final api = ref.watch(apiServiceProvider);
-  final session = ref.watch(sessionProvider).value;
+class RecommendationRepository {
+  final ApiService _api;
 
-  if (session == null) return [];
+  RecommendationRepository(this._api);
 
-  final data =
-      await api.getRecommendations(session.sessionId);
-
-  return data.map<MenuItem>((e) => MenuItem.fromJson(e)).toList();
-});
+  /// Get personalized recommendations
+  Future<RecommendationResponse> getRecommendations() async {
+    final response = await _api.get('/recommendations');
+    return RecommendationResponse.fromJson(response.data);
+  }
+}

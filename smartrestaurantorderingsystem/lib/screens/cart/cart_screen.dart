@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/cart_provider.dart';
-import '../../providers/session_provider.dart';
-import '../../core/services/api_service.dart';
+import '../../providers/order_provider.dart';
+import '../../widgets/recommendation_widget.dart';
 import '../order/order_tracking_screen.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -11,118 +11,232 @@ class CartScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cart = ref.watch(cartProvider);
-    final total = ref.read(cartProvider.notifier).totalPrice;
+    final cartAsync = ref.watch(cartProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your Cart"),
       ),
-      body: Column(
-        children: [
-          // 🛒 Cart Items
-          Expanded(
-            child: cart.isEmpty
-                ? const Center(
-                    child: Text(
-                      "Cart is empty",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  )
-                : ListView(
-                    children: cart.map((item) {
-                      return ListTile(
-                        title: Text(item.name),
-                        subtitle: Text(
-                          "${item.price} x ${item.quantity}",
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            ref
-                                .read(cartProvider.notifier)
-                                .removeItem(item.id);
-                          },
-                        ),
-                      );
-                    }).toList(),
+      body: cartAsync.when(
+        data: (cart) {
+          if (cart.items.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    "Your cart is empty",
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-          ),
+                ],
+              ),
+            );
+          }
 
-          // 💰 Bottom Section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text(
-                  "Total: ${total.toStringAsFixed(2)} ETB",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+          return Column(
+            children: [
+              // Recommendations section
+              const RecommendationWidget(),
+              const Divider(),
+
+              // Cart Items
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cart.items.length,
+                  itemBuilder: (context, index) {
+                    final item = cart.items[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: ListTile(
+                        title: Text(
+                          item.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text('\$${item.price.toStringAsFixed(2)} each'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Decrease quantity
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: () {
+                                ref.read(cartProvider.notifier).updateQuantity(
+                                  item.menuItemId,
+                                  item.quantity - 1,
+                                );
+                              },
+                            ),
+                            // Quantity
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                item.quantity.toString(),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            // Increase quantity
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: () {
+                                ref.read(cartProvider.notifier).updateQuantity(
+                                  item.menuItemId,
+                                  item.quantity + 1,
+                                );
+                              },
+                            ),
+                            // Remove item
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                ref.read(cartProvider.notifier).removeItem(item.menuItemId);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('${item.name} removed from cart'),
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
+              ),
 
-                const SizedBox(height: 12),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    final session = ref.read(sessionProvider).value;
-
-                    if (session == null || cart.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content:
-                              Text("No session or empty cart"),
-                        ),
-                      );
-                      return;
-                    }
-
-                    final items = cart.map((item) {
-                      return {
-                        "id": item.id,
-                        "name": item.name,
-                        "price": item.price,
-                        "quantity": item.quantity,
-                      };
-                    }).toList();
-
-                    try {
-                      final api = ref.read(apiServiceProvider);
-
-                      final response = await api.createOrder(
-                        session.sessionId,
-                        items,
-                      );
-
-                      // ✅ clear cart
-                      ref.read(cartProvider.notifier).state = [];
-
-                      // ✅ go to tracking screen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => OrderTrackingScreen(
-                            orderId: response['order_id'],
+              // Total and Place Order button
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, -3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      );
-
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Error: $e"),
+                        Text(
+                          '\$${cart.totalPrice.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
                         ),
-                      );
-                    }
-                  },
-                  child: const Text("Place Order"),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: cart.items.isEmpty
+                            ? null
+                            : () => _placeOrder(context, ref),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: Colors.grey,
+                        ),
+                        child: const Text(
+                          'Place Order',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error loading cart: $error'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.read(cartProvider.notifier).loadCart(),
+                child: const Text('Retry'),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Future<void> _placeOrder(BuildContext context, WidgetRef ref) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Place order
+      final order = await ref.read(orderProvider.notifier).placeOrder();
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Navigate to order tracking
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => OrderTrackingScreen(orderId: order.id),
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error placing order: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

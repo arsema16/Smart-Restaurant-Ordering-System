@@ -4,46 +4,69 @@ import '../../providers/session_provider.dart';
 import '../qr/qr_scanner_screen.dart';
 import '../menu/menu_screen.dart';
 
-class SplashScreen extends ConsumerWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+}
 
-    // ✅ Correct place for listen
-    ref.listen(sessionProvider, (previous, next) {
-      next.when(
-        data: (session) {
-          if (session != null) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const MenuScreen()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const QRScannerScreen()),
-            );
-          }
-        },
-        loading: () {},
-        error: (_, __) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const QRScannerScreen()),
-          );
-        },
+class _SplashScreenState extends ConsumerState<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    // Try to resume existing session
+    await ref.read(sessionProvider.notifier).resumeSession();
+    
+    // Wait a bit for the UI
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (!mounted) return;
+
+    final session = ref.read(sessionProvider);
+    
+    if (session != null) {
+      // Has session, go to menu
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MenuScreen()),
       );
-    });
+    } else {
+      // No session, go to QR scanner
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const QRScannerScreen()),
+      );
+    }
+  }
 
-    final sessionState = ref.watch(sessionProvider);
-
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: sessionState.when(
-          data: (_) => const Text("Redirecting..."),
-          loading: () => const CircularProgressIndicator(),
-          error: (e, _) => Text("Error: $e"),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.restaurant,
+              size: 80,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Smart Restaurant',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 48),
+            const CircularProgressIndicator(),
+          ],
         ),
       ),
     );
