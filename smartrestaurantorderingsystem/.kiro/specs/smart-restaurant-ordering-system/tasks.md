@@ -256,8 +256,8 @@ The implementation follows a layered approach: database models → core services
     - Test similarity matrix refresh background task
     - _Requirements: 8.6_
 
-- [ ] 12. Implement authentication and middleware
-  - [ ] 12.1 Create JWT authentication for staff
+- [x] 12. Implement authentication and middleware
+  - [x] 12.1 Create JWT authentication for staff
     - Create `app/services/auth_service.py`
     - Implement `hash_password(password)` using bcrypt
     - Implement `verify_password(plain, hashed)` using bcrypt
@@ -266,7 +266,7 @@ The implementation follows a layered approach: database models → core services
     - Implement `decode_token(token)` → returns payload or raises 401
     - _Requirements: 5.6_
 
-  - [ ] 12.2 Create middleware for session and JWT validation
+  - [x] 12.2 Create middleware for session and JWT validation
     - Create `app/middleware/session.py` with `validate_session_token` dependency
     - Create `app/middleware/auth.py` with `get_current_staff` dependency (validates JWT, checks is_active)
     - Create `app/middleware/auth.py` with `require_admin` dependency (checks role="admin")
