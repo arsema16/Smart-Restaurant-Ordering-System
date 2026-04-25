@@ -299,8 +299,8 @@ The implementation follows a layered approach: database models → core services
     - Test WebSocket reconnection and state resync
     - _Requirements: 2.4, 4.4, 5.1, 6.1, 10.4_
 
-- [ ] 14. Implement REST API endpoints
-  - [ ] 14.1 Create guest endpoints
+- [x] 14. Implement REST API endpoints
+  - [x] 14.1 Create guest endpoints
     - Create `app/routers/sessions.py` with POST /sessions, GET /sessions/{session_id}
     - Create `app/routers/menu.py` with GET /menu
     - Create `app/routers/cart.py` with GET /cart, POST /cart/items, PATCH /cart/items/{item_id}, DELETE /cart/items/{item_id}
@@ -309,7 +309,7 @@ The implementation follows a layered approach: database models → core services
     - Apply session token validation middleware to all guest endpoints
     - _Requirements: 1.1, 1.3, 2.1, 2.5, 3.1, 3.2, 3.3, 4.1, 4.5, 6.4, 8.1_
 
-  - [ ] 14.2 Create staff endpoints
+  - [x] 14.2 Create staff endpoints
     - Create `app/routers/auth.py` with POST /auth/login, POST /auth/refresh
     - Create `app/routers/staff_orders.py` with GET /staff/orders, PATCH /staff/orders/{id}/status
     - Create `app/routers/staff_menu.py` with GET /staff/menu, POST /staff/menu, PUT /staff/menu/{id}, PATCH /staff/menu/{id}/availability
@@ -317,13 +317,13 @@ The implementation follows a layered approach: database models → core services
     - Apply admin role check to menu create/delete endpoints
     - _Requirements: 5.1, 5.2, 5.3, 5.6, 9.1_
 
-  - [ ] 14.3 Create WebSocket endpoints
+  - [x] 14.3 Create WebSocket endpoints
     - Create `app/routers/ws.py` with GET /ws/guest/{session_id}, GET /ws/staff
     - Validate session token (query param) for guest WS, JWT (query param) for staff WS
     - Implement ping/pong keepalive every 30s
     - _Requirements: 4.4, 5.1, 6.1, 10.4_
 
-  - [ ] 14.4 Wire all routers into FastAPI app
+  - [x] 14.4 Wire all routers into FastAPI app
     - Create `app/main.py` with FastAPI app factory
     - Register all routers with `/api/v1` prefix
     - Add CORS middleware for frontend
