@@ -122,8 +122,8 @@ The implementation follows a layered approach: database models → core services
   - Run all property tests and unit tests for models, schemas, session service, menu service
   - Ensure all tests pass, ask the user if questions arise
 
-- [ ] 7. Implement cart service
-  - [ ] 7.1 Create cart service with add/remove/update operations
+- [-] 7. Implement cart service
+  - [-] 7.1 Create cart service with add/remove/update operations
     - Create `app/services/cart_service.py`
     - Implement `get_cart(session_id)` → returns CartResponse with items and total_price
     - Implement `add_item(session_id, menu_item_id, quantity)` → adds or increments quantity, validates availability
