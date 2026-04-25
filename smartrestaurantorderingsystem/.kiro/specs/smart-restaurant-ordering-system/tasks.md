@@ -279,8 +279,8 @@ The implementation follows a layered approach: database models → core services
     - Test non-admin user cannot create menu items (403)
     - _Requirements: 5.6_
 
-- [ ] 13. Implement WebSocket connection manager
-  - [ ] 13.1 Create WebSocket connection manager with Redis pub/sub
+- [x] 13. Implement WebSocket connection manager
+  - [x] 13.1 Create WebSocket connection manager with Redis pub/sub
     - Create `app/services/websocket_manager.py`
     - Implement `ConnectionManager` class with guest_connections dict and staff_connections list
     - Implement `connect_guest(session_id, ws)` → adds to guest_connections, subscribes to Redis channels
