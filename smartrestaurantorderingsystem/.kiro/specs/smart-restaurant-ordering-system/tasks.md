@@ -225,8 +225,8 @@ The implementation follows a layered approach: database models → core services
     - Test profile survives session changes
     - _Requirements: 7.4, 7.5_
 
-- [ ] 11. Implement recommendation engine
-  - [ ] 11.1 Create recommendation engine interface and implementations
+- [x] 11. Implement recommendation engine
+  - [x] 11.1 Create recommendation engine interface and implementations
     - Create `app/recommendation/engine.py` with RecommendationEngine Protocol
     - Create `app/recommendation/collaborative.py` with CollaborativeEngine (item-item similarity using scikit-learn)
     - Create `app/recommendation/fallback.py` with PopularityEngine (ranks by global order count)
