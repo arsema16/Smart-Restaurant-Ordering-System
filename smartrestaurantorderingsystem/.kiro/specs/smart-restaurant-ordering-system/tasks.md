@@ -201,8 +201,8 @@ The implementation follows a layered approach: database models → core services
   - Run all property tests and unit tests for cart and order services
   - Ensure all tests pass, ask the user if questions arise
 
-- [ ] 10. Implement preference profile service
-  - [ ] 10.1 Create preference profile service
+- [x] 10. Implement preference profile service
+  - [x] 10.1 Create preference profile service
     - Create `app/services/preference_profile_service.py`
     - Implement `get_or_create_profile(persistent_user_id)` → returns UserProfile or creates empty one
     - Implement `update_profile_on_order(persistent_user_id, ordered_item_ids)` → increments counts in most_ordered_items (top 5), prepends to recently_ordered_items (max 10)
