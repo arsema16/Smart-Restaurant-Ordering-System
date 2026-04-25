@@ -122,8 +122,8 @@ The implementation follows a layered approach: database models → core services
   - Run all property tests and unit tests for models, schemas, session service, menu service
   - Ensure all tests pass, ask the user if questions arise
 
-- [-] 7. Implement cart service
-  - [-] 7.1 Create cart service with add/remove/update operations
+- [x] 7. Implement cart service
+  - [x] 7.1 Create cart service with add/remove/update operations
     - Create `app/services/cart_service.py`
     - Implement `get_cart(session_id)` → returns CartResponse with items and total_price
     - Implement `add_item(session_id, menu_item_id, quantity)` → adds or increments quantity, validates availability
@@ -149,8 +149,8 @@ The implementation follows a layered approach: database models → core services
     - Test removing item when quantity reaches zero
     - _Requirements: 3.2, 3.3, 3.5_
 
-- [ ] 8. Implement order service
-  - [ ] 8.1 Create order service with placement and status management
+- [x] 8. Implement order service
+  - [x] 8.1 Create order service with placement and status management
     - Create `app/services/order_service.py`
     - Implement `generate_order_number()` → generates unique human-readable order number (e.g., "ORD-0042")
     - Implement `place_order(session_id)` → creates Order from cart, clears cart, sets status="Received", publishes Redis event
@@ -197,7 +197,7 @@ The implementation follows a layered approach: database models → core services
     - Test concurrent order status updates result in consistent state
     - _Requirements: 4.6, 6.5, 10.3_
 
-- [ ] 9. Checkpoint - Ensure cart and order services work end-to-end
+- [x] 9. Checkpoint - Ensure cart and order services work end-to-end
   - Run all property tests and unit tests for cart and order services
   - Ensure all tests pass, ask the user if questions arise
 
