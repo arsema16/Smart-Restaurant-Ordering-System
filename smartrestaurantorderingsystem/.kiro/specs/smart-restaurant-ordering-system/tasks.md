@@ -386,14 +386,14 @@ The implementation follows a layered approach: database models → core services
     - Update recommendations when cart changes
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-- [ ] 18. Implement staff dashboard UI
-  - [ ] 18.1 Create staff login page
+- [x] 18. Implement staff dashboard UI
+  - [x] 18.1 Create staff login page
     - Create `src/pages/StaffLoginPage.tsx` with username/password form
     - Call POST /auth/login, store JWT in localStorage
     - Redirect to dashboard on success
     - _Requirements: 5.6_
 
-  - [ ] 18.2 Create staff order management dashboard
+  - [x] 18.2 Create staff order management dashboard
     - Create `src/pages/StaffDashboardPage.tsx` with active orders list
     - Display order number, table identifier, items, status
     - Add status update buttons (Received → Cooking → Ready → Delivered)
@@ -402,26 +402,26 @@ The implementation follows a layered approach: database models → core services
     - Show error toast for invalid status transitions
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 18.3 Create staff menu management UI
+  - [x] 18.3 Create staff menu management UI
     - Create `src/pages/StaffMenuPage.tsx` with menu item list and CRUD forms
     - Implement create, update, toggle availability actions
     - Show validation errors for invalid price or prep time
     - Restrict create/delete to admin role
     - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
-- [ ] 19. Wire frontend and backend together
-  - [ ] 19.1 Set up frontend routing
+- [x] 19. Wire frontend and backend together
+  - [x] 19.1 Set up frontend routing
     - Create `src/App.tsx` with React Router routes for guest and staff pages
     - Implement protected routes for staff pages (check JWT)
     - Implement session restoration on page reload (check localStorage for session_token)
     - _Requirements: 1.3, 5.6_
 
-  - [ ] 19.2 Implement persistent user identity
+  - [x] 19.2 Implement persistent user identity
     - Generate `persistent_user_id` on first visit, store in localStorage
     - Send `persistent_user_id` in POST /sessions request body
     - _Requirements: 7.4_
 
-  - [ ] 19.3 Test full end-to-end flows
+  - [x] 19.3 Test full end-to-end flows
     - Test guest flow: QR scan → browse menu → add to cart → place order → track status → receive delivered notification
     - Test staff flow: login → view new order → update status → verify guest receives update
     - Test menu availability change propagates to all guests
@@ -429,7 +429,7 @@ The implementation follows a layered approach: database models → core services
     - Test session access from different device
     - _Requirements: All requirements_
 
-- [ ] 20. Final checkpoint - Full system integration test
+- [-] 20. Final checkpoint - Full system integration test
   - Run all backend tests (property, unit, integration)
   - Run frontend in dev mode, test all user flows manually
   - Test WebSocket reconnection and state resync

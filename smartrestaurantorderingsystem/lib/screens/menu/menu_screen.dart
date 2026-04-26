@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/menu_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/recommendation_provider.dart';
+import '../../providers/websocket_provider.dart';
 import '../../models/menu_item_model.dart';
 import '../cart/cart_screen.dart';
 import '../../widgets/recommendation_widget.dart';
@@ -17,6 +18,15 @@ class MenuScreen extends ConsumerStatefulWidget {
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
   String? selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    // Connect to WebSocket for real-time updates
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(websocketProvider.notifier).connectGuest();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

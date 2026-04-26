@@ -5,6 +5,9 @@ import '../repositories/menu_repository.dart';
 import '../repositories/cart_repository.dart';
 import '../repositories/order_repository.dart';
 import '../repositories/recommendation_repository.dart';
+import '../repositories/auth_repository.dart';
+import '../repositories/staff_order_repository.dart';
+import '../repositories/staff_menu_repository.dart';
 import '../core/constants/api_constants.dart';
 
 /// Provider for API service
@@ -40,5 +43,23 @@ final orderRepositoryProvider = Provider<OrderRepository>((ref) {
 final recommendationRepositoryProvider = Provider<RecommendationRepository>((ref) {
   final api = ref.watch(apiServiceProvider);
   return RecommendationRepository(api);
+});
+
+/// Provider for Auth Repository
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  final api = ref.watch(apiServiceProvider);
+  return AuthRepository(api);
+});
+
+/// Provider for Staff Order Repository
+final staffOrderRepositoryProvider = Provider<StaffOrderRepository>((ref) {
+  final api = ref.watch(apiServiceProvider);
+  return StaffOrderRepository(api);
+});
+
+/// Provider for Staff Menu Repository
+final staffMenuRepositoryProvider = Provider<StaffMenuRepository>((ref) {
+  final api = ref.watch(apiServiceProvider);
+  return StaffMenuRepository(api);
 });
 
