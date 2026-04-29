@@ -177,11 +177,23 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                     const SizedBox(height: 16),
                     const Text('Could not load menu',
                         style: TextStyle(fontSize: 18, color: Colors.grey)),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () =>
-                          ref.read(menuProvider.notifier).loadMenu(),
-                      child: const Text('Retry'),
+                    const SizedBox(height: 8),
+                    Text(
+                      'The server may be waking up.\nPlease wait 30 seconds and retry.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => ref.read(menuProvider.notifier).loadMenu(),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE65100),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                   ],
                 ),
