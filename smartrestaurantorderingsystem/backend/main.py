@@ -257,3 +257,56 @@ def get_recommendations(x_session_token: Optional[str] = Header(default=None)):
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "app": "Smart Restaurant Ordering System"}
+
+# ─── Staff Auth ───────────────────────────────────────────────────────────────
+# Simple staff auth (no real JWT — just a hardcoded token for demo)
+STAFF_CREDENTIALS = {
+    "admin": "admin123",
+    "staff": "staff123",
+}
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@app.post("/api/v1/auth/login")
+def staff_login(request: LoginRequest):
+    if request.username in STAFF_CREDENTIALS and \
+       STAFF_CREDENTIALS[request.username] == request.password:
+        # Return a fake JWT token
+        token = f"staff-token-{request.username}-{str(uuid.uuid4())[:8]}"
+        return {
+            "access_token": token,
+            "refresh_token": token + "-refresh",
+            "token_type": "bearer"
+        }
+    raise HTTPException(status_code=401, detail="Invalid credentials")
+
+@app.post("/api/v1/auth/refresh")
+def refresh_token(request: dict):
+    # Just return a new token for demo
+    token = f"staff-token-refreshed-{str(uuid.uuid4())[:8]}"
+    return {
+        "access_token": token,
+        "refresh_token": token + "-refresh",
+        "token_type": "bearer"
+    }
+
+# ─── Staff Orders (for staff dashboard) ──────────────────────────────────────
+@app.get("/api/v1/staff/orders")
+def get_all_orders():
+    """Staff view: all orders across all sessions."""
+    return list(orders.values())
+
+@app.patch("/api/v1/staff/orders/{order_id}/status")
+def update_order_status(order_id: str, body: dict):
+    """Staff updates order status."""
+    order = orders.get(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    new_status = body.get("status")
+    valid = ["Received", "Cooking", "Ready", "Delivered"]
+    if new_status not in valid:
+        raise HTTPException(status_code=400, detail=f"Status must be one of {valid}")
+    orders[order_id]["status"] = new_status
+    return orders[order_id]

@@ -175,10 +175,27 @@ class WelcomeScreen extends StatelessWidget {
                       builder: (_) => const QRGeneratorScreen(),
                     ),
                   ),
+                  icon: const Icon(Icons.qr_code, color: Colors.white70),
+                  label: const Text(
+                    'Generate Table QR Codes',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white30),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/staff/login'),
                   icon: const Icon(Icons.admin_panel_settings,
                       color: Colors.white70),
                   label: const Text(
-                    'Staff Portal',
+                    'Staff Dashboard',
                     style: TextStyle(color: Colors.white70),
                   ),
                   style: OutlinedButton.styleFrom(
