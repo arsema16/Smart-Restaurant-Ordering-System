@@ -8,6 +8,7 @@ import '../../models/menu_item_model.dart';
 import '../../repositories/menu_repository.dart';
 import '../../utils/food_icons.dart';
 import '../cart/cart_screen.dart';
+import '../order/order_history_screen.dart';
 import '../../widgets/recommendation_widget.dart';
 import '../../providers/api_provider.dart';
 
@@ -109,6 +110,14 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 _searchResults = [];
               }),
             ),
+          // Orders history button
+          IconButton(
+            icon: const Icon(Icons.receipt_long_outlined, size: 26),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const OrderHistoryScreen()),
+            ),
+          ),
           Stack(
             alignment: Alignment.center,
             children: [

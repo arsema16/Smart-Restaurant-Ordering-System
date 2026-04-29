@@ -221,36 +221,70 @@ def get_order(order_id: str):
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
-# ─── AI Recommendations (per-user) ───────────────────────────────────────────
+# ─── AI Recommendations (per-user, with upselling) ───────────────────────────
 @app.get("/api/v1/recommendations")
 def get_recommendations(x_session_token: Optional[str] = Header(default=None)):
     token = x_session_token or "guest"
     uid = get_persistent_user_id(token)
-    cart_ids = {ci["menu_item_id"] for ci in carts.get(token, [])}
+    cart_items = carts.get(token, [])
+    cart_ids = {ci["menu_item_id"] for ci in cart_items}
+    cart_categories = {ci.get("category", "") for ci in cart_items}
 
-    # Items the user has ordered before, sorted by frequency
+    # Determine cart categories from menu_items lookup
+    cart_menu_categories = set()
+    for ci in cart_items:
+        menu_item = next((m for m in menu_items if m["id"] == ci["menu_item_id"]), None)
+        if menu_item:
+            cart_menu_categories.add(menu_item["category"])
+
+    recs = []
+
+    # 1. Personal recommendations from order history
     if uid and uid in user_profiles:
         profile = user_profiles[uid]
         ordered_ids = sorted(profile.keys(), key=lambda i: profile[i], reverse=True)
-        # Recommend previously ordered items not currently in cart
         personal = [
             m for m in menu_items
             if m["id"] in ordered_ids and m["id"] not in cart_ids and m["is_available"]
         ]
-        if personal:
-            recs = personal[:3]
-            return [
-                {**m, "reason": f"You've ordered this {user_profiles[uid][m['id']]} time(s)"}
-                for m in recs
-            ]
+        for m in personal[:2]:
+            recs.append({**m, "reason": f"You've ordered this {profile[m['id']]} time(s)"})
 
-    # Fallback: recommend popular items not in cart
-    popular_ids = [10, 1, 19, 16, 6]  # Ethiopian Coffee, Doro Wat, Sambusa, Ice Cream, Burger
-    fallback = [
-        m for m in menu_items
-        if m["id"] in popular_ids and m["id"] not in cart_ids and m["is_available"]
-    ]
-    return [{**m, "reason": "Popular choice"} for m in fallback[:3]]
+    # 2. Smart upselling — if cart has Main Course but no Drinks, suggest a drink
+    if "Main Course" in cart_menu_categories or "Fast Food" in cart_menu_categories:
+        if "Drinks" not in cart_menu_categories:
+            drink = next(
+                (m for m in menu_items
+                 if m["category"] == "Drinks" and m["id"] not in cart_ids
+                 and m["is_available"]),
+                None
+            )
+            if drink and not any(r["id"] == drink["id"] for r in recs):
+                recs.append({**drink, "reason": "Pairs well with your meal 🥤"})
+
+    # 3. If cart has Main Course but no Desserts, suggest a dessert
+    if "Main Course" in cart_menu_categories or "Fast Food" in cart_menu_categories:
+        if "Desserts" not in cart_menu_categories:
+            dessert = next(
+                (m for m in menu_items
+                 if m["category"] == "Desserts" and m["id"] not in cart_ids
+                 and m["is_available"]),
+                None
+            )
+            if dessert and not any(r["id"] == dessert["id"] for r in recs):
+                recs.append({**dessert, "reason": "Complete your meal with dessert 🍰"})
+
+    # 4. Fallback: popular items not in cart
+    if len(recs) < 3:
+        popular_ids = [10, 1, 19, 16, 6]
+        for pid in popular_ids:
+            if len(recs) >= 3:
+                break
+            m = next((x for x in menu_items if x["id"] == pid and x["id"] not in cart_ids and x["is_available"]), None)
+            if m and not any(r["id"] == m["id"] for r in recs):
+                recs.append({**m, "reason": "Popular choice ⭐"})
+
+    return recs[:3]
 
 # ─── Health ───────────────────────────────────────────────────────────────────
 @app.get("/api/v1/health")
@@ -310,3 +344,32 @@ def update_order_status(order_id: str, body: dict):
         raise HTTPException(status_code=400, detail=f"Status must be one of {valid}")
     orders[order_id]["status"] = new_status
     return orders[order_id]
+
+# ─── User Profile endpoint ────────────────────────────────────────────────────
+@app.get("/api/v1/profile")
+def get_user_profile(x_session_token: Optional[str] = Header(default=None)):
+    """Returns the user's preference profile: most ordered and recently ordered items."""
+    token = x_session_token or "guest"
+    uid = get_persistent_user_id(token)
+
+    if not uid or uid not in user_profiles:
+        return {"most_ordered": [], "recently_ordered": [], "total_orders": 0}
+
+    profile = user_profiles[uid]
+
+    # Most ordered: top 5 by count
+    sorted_ids = sorted(profile.keys(), key=lambda i: profile[i], reverse=True)[:5]
+    most_ordered = []
+    for mid in sorted_ids:
+        item = next((m for m in menu_items if m["id"] == mid), None)
+        if item:
+            most_ordered.append({**item, "order_count": profile[mid]})
+
+    # Count total orders for this user
+    total = sum(profile.values())
+
+    return {
+        "most_ordered": most_ordered,
+        "recently_ordered": most_ordered,  # Same for now (no timestamp tracking)
+        "total_orders": total,
+    }
