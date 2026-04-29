@@ -15,21 +15,22 @@ A full-stack digital restaurant ordering system where customers scan a QR code a
 ┌──────────────────────────────────────────────────────────────┐
 │                  Flutter Web (Firebase Hosting)              │
 │                                                              │
-│  ┌─────────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐  │
-│  │ Welcome/QR  │→ │   Menu   │→ │   Cart   │→ │ Tracking│  │
-│  └─────────────┘  └──────────┘  └──────────┘  └─────────┘  │
+│  ┌─────────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐    │
+│  │ Welcome/QR  │→ │   Menu   │→ │   Cart   │→ │ Tracking│    │
+│  └─────────────┘  └──────────┘  └──────────┘  └─────────┘    │
 │                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │         Staff Dashboard (Login → Orders → Status)    │   │
-│  └──────────────────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │         Staff Dashboard (Login → Orders → Status)    │    │
+│  └──────────────────────────────────────────────────────┘    │
 └────────────────────────┬─────────────────────────────────────┘
                          │ HTTPS REST API
                          │ (X-Session-Token header)
 ┌────────────────────────▼─────────────────────────────────────┐
-│                  FastAPI Backend (Railway)                    │
+│                  FastAPI Backend (Railway)                   │
 │                                                              │
 │  Sessions  │  Menu  │  Cart  │  Orders  │  Recommendations   │
-│  Auth      │  Staff Orders   │  User Profiles               │
+│                                                              │
+│  Auth      │  Staff Orders   │  User Profiles                │
 └──────────────────────────────────────────────────────────────┘
 ```
 
