@@ -116,7 +116,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                     title: Text(item.name),
                     subtitle: Text('Quantity: ${item.quantity}'),
                     trailing: Text(
-                      '\$${(item.unitPrice * item.quantity).toStringAsFixed(2)}',
+                      '${(item.unitPrice * item.quantity).toStringAsFixed(2)} Birr',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -142,7 +142,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                           ),
                         ),
                         Text(
-                          '\$${order.items.fold<double>(0, (sum, item) => sum + (item.unitPrice * item.quantity)).toStringAsFixed(2)}',
+                          '${order.items.fold<double>(0, (sum, item) => sum + (item.unitPrice * item.quantity)).toStringAsFixed(2)} Birr',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,

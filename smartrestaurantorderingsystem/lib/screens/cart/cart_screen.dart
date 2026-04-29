@@ -6,11 +6,26 @@ import '../../providers/order_provider.dart';
 import '../../widgets/recommendation_widget.dart';
 import '../order/order_tracking_screen.dart';
 
-class CartScreen extends ConsumerWidget {
+class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends ConsumerState<CartScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Reload cart when screen is displayed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('CartScreen: Reloading cart...');
+      ref.read(cartProvider.notifier).loadCart();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cartAsync = ref.watch(cartProvider);
 
     return Scaffold(
@@ -54,7 +69,7 @@ class CartScreen extends ConsumerWidget {
                           item.name,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text('\$${item.price.toStringAsFixed(2)} each'),
+                        subtitle: Text('${item.price.toStringAsFixed(2)} Birr each'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -141,7 +156,7 @@ class CartScreen extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          '\$${cart.totalPrice.toStringAsFixed(2)}',
+                          '${cart.totalPrice.toStringAsFixed(2)} Birr',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

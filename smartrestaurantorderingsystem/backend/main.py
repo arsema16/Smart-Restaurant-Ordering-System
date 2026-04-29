@@ -39,43 +39,116 @@ def start_session(request: SessionRequest):
         "session_id": session_id,
         "table_id": request.table_id
     }
+
+# New endpoint for Flutter app compatibility
+class SessionCreateRequest(BaseModel):
+    table_identifier: str
+    session_token: str | None = None
+    persistent_user_id: str
+
+class SessionCreateResponse(BaseModel):
+    session_id: str
+    session_token: str
+    table_identifier: str
+    is_new: bool
+
+@app.post("/api/v1/sessions", response_model=SessionCreateResponse)
+def create_session(request: SessionCreateRequest):
+    # Generate session ID and token
+    session_id = str(uuid.uuid4())
+    session_token = request.session_token or str(uuid.uuid4())
+    
+    # Check if this is a new session or resuming
+    is_new = request.session_token is None
+    
+    sessions[session_id] = {
+        "table_identifier": request.table_identifier,
+        "session_token": session_token,
+        "persistent_user_id": request.persistent_user_id
+    }
+    
+    return {
+        "session_id": session_id,
+        "session_token": session_token,
+        "table_identifier": request.table_identifier,
+        "is_new": is_new
+    }
 from typing import List
 
 class MenuItem(BaseModel):
-    id: str
+    id: int
     name: str
     price: float
     category: str
-    available: bool
+    prep_time_minutes: int
+    is_available: bool
 
 # sample menu data
 menu_items = [
     {
-        "id": "1",
+        "id": 1,
         "name": "Burger",
-        "price": 150,
+        "price": 150.0,
         "category": "Main",
-        "available": True
+        "prep_time_minutes": 15,
+        "is_available": True
     },
     {
-        "id": "2",
+        "id": 2,
         "name": "Pizza",
-        "price": 200,
+        "price": 200.0,
         "category": "Main",
-        "available": True
+        "prep_time_minutes": 20,
+        "is_available": True
     },
     {
-        "id": "3",
+        "id": 3,
+        "name": "Pasta",
+        "price": 180.0,
+        "category": "Main",
+        "prep_time_minutes": 18,
+        "is_available": True
+    },
+    {
+        "id": 4,
         "name": "Coke",
-        "price": 50,
+        "price": 50.0,
         "category": "Drinks",
-        "available": True
+        "prep_time_minutes": 2,
+        "is_available": True
+    },
+    {
+        "id": 5,
+        "name": "Orange Juice",
+        "price": 60.0,
+        "category": "Drinks",
+        "prep_time_minutes": 3,
+        "is_available": True
+    },
+    {
+        "id": 6,
+        "name": "Ice Cream",
+        "price": 70.0,
+        "category": "Desserts",
+        "prep_time_minutes": 5,
+        "is_available": True
     },
 ]
 
-@app.get("/menu", response_model=List[MenuItem])
+@app.get("/menu")
 def get_menu():
     return menu_items
+
+@app.get("/api/v1/menu")
+def get_menu_v1():
+    # Group menu items by category
+    grouped = {}
+    for item in menu_items:
+        category = item["category"]
+        if category not in grouped:
+            grouped[category] = []
+        grouped[category].append(item)
+    return grouped
 from datetime import datetime
 
 class OrderItem(BaseModel):
@@ -135,3 +208,163 @@ def recommend(session_id: str):
             "available": True
         }
     ]
+
+@app.get("/api/v1/health")
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "app": "Smart Restaurant Ordering System"}
+
+# Cart storage (in-memory)
+carts = {}  # session_id -> list of cart items
+
+# Cart endpoints
+@app.get("/api/v1/cart")
+def get_cart():
+    # Get cart for default session
+    session_id = "default"
+    
+    if session_id in carts and carts[session_id]:
+        total = sum(ci["price"] * ci["quantity"] for ci in carts[session_id])
+        return {"items": carts[session_id], "total_price": total}
+    
+    return {"items": [], "total_price": 0.0}
+
+@app.post("/api/v1/cart/items")
+def add_cart_item(item: dict):
+    # Get session from headers (simplified - just use a default session)
+    session_id = "default"
+    
+    if session_id not in carts:
+        carts[session_id] = []
+    
+    # Check if item already exists
+    menu_item_id = item.get("menu_item_id")
+    quantity = item.get("quantity", 1)
+    
+    # Find the menu item details
+    menu_item = next((m for m in menu_items if m["id"] == menu_item_id), None)
+    if not menu_item:
+        return {"items": [], "total_price": 0.0}
+    
+    # Check if item already in cart
+    existing_item = next((ci for ci in carts[session_id] if ci["menu_item_id"] == menu_item_id), None)
+    
+    if existing_item:
+        existing_item["quantity"] += quantity
+    else:
+        carts[session_id].append({
+            "id": len(carts[session_id]) + 1,
+            "menu_item_id": menu_item_id,
+            "name": menu_item["name"],
+            "price": menu_item["price"],
+            "quantity": quantity,
+            "added_at": datetime.now().isoformat()
+        })
+    
+    # Calculate total
+    total = sum(ci["price"] * ci["quantity"] for ci in carts[session_id])
+    
+    return {"items": carts[session_id], "total_price": total}
+
+@app.delete("/api/v1/cart/items/{item_id}")
+def remove_cart_item(item_id: int):
+    session_id = "default"
+    
+    if session_id in carts:
+        carts[session_id] = [ci for ci in carts[session_id] if ci["menu_item_id"] != item_id]
+        total = sum(ci["price"] * ci["quantity"] for ci in carts[session_id])
+        return {"items": carts[session_id], "total_price": total}
+    
+    return {"items": [], "total_price": 0.0}
+
+@app.patch("/api/v1/cart/items/{item_id}")
+def update_cart_item(item_id: int, item: dict):
+    session_id = "default"
+    
+    if session_id in carts:
+        cart_item = next((ci for ci in carts[session_id] if ci["menu_item_id"] == item_id), None)
+        if cart_item:
+            cart_item["quantity"] = item.get("quantity", cart_item["quantity"])
+            
+            # Remove if quantity is 0
+            if cart_item["quantity"] <= 0:
+                carts[session_id] = [ci for ci in carts[session_id] if ci["menu_item_id"] != item_id]
+        
+        total = sum(ci["price"] * ci["quantity"] for ci in carts[session_id])
+        return {"items": carts[session_id], "total_price": total}
+    
+    return {"items": [], "total_price": 0.0}
+
+# Recommendations endpoint
+@app.get("/api/v1/recommendations")
+def get_recommendations():
+    # Return some sample recommendations
+    return [
+        {
+            "id": 4,
+            "name": "Coke",
+            "price": 50.0,
+            "category": "Drinks",
+            "prep_time_minutes": 2,
+            "is_available": True
+        },
+        {
+            "id": 6,
+            "name": "Ice Cream",
+            "price": 70.0,
+            "category": "Desserts",
+            "prep_time_minutes": 5,
+            "is_available": True
+        }
+    ]
+
+# Orders endpoints
+@app.post("/api/v1/orders")
+def create_order_v1():
+    # Get cart for default session
+    session_id = "default"
+    
+    if session_id not in carts or not carts[session_id]:
+        return {"error": "Cart is empty"}
+    
+    # Create order from cart
+    order_id = str(uuid.uuid4())
+    order_number = f"ORD-{len(orders) + 1:04d}"
+    
+    # Convert cart items to order items
+    order_items = []
+    for cart_item in carts[session_id]:
+        order_items.append({
+            "menu_item_id": cart_item["menu_item_id"],
+            "name": cart_item["name"],
+            "quantity": cart_item["quantity"],
+            "unit_price": cart_item["price"]
+        })
+    
+    order = {
+        "id": order_id,
+        "order_number": order_number,
+        "status": "Received",
+        "items": order_items,
+        "estimated_wait_minutes": 20,
+        "created_at": datetime.now().isoformat()
+    }
+    
+    orders[order_id] = order
+    
+    # Clear cart after order
+    carts[session_id] = []
+    
+    return order
+
+@app.get("/api/v1/orders")
+def get_orders_v1():
+    # Return all orders
+    return list(orders.values())
+
+@app.get("/api/v1/orders/{order_id}")
+def get_order_by_id_v1(order_id: str):
+    order = orders.get(order_id)
+    if not order:
+        return {"error": "Order not found"}
+    return order

@@ -187,7 +187,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('\$${item.price.toStringAsFixed(2)}'),
+            Text('${item.price.toStringAsFixed(2)} Birr'),
             Text('Prep time: ${item.prepTimeMinutes} min'),
             if (!item.isAvailable)
               const Text(

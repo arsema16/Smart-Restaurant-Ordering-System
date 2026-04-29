@@ -1,7 +1,7 @@
 /// API configuration constants
 class ApiConstants {
   // Base URL for the backend API
-  // Change this to your backend server URL
+  // Use localhost when running on the same computer
   static const String baseUrl = 'http://localhost:8000';
 
   // API version prefix

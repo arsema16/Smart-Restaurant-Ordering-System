@@ -16,7 +16,7 @@ class _QRGeneratorScreenState extends State<QRGeneratorScreen> {
   // Base URL of your web app
   // For local development, use your local IP address
   // For production, use your actual domain
-  static const String baseUrl = 'http://localhost:8080'; // Change this to your actual URL
+  static const String baseUrl = 'http://10.163.23.62:8080'; // Your computer's IP address
 
   void _generateQRCode() {
     final tableId = _tableController.text.trim();

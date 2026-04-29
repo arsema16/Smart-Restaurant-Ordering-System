@@ -429,7 +429,7 @@ The implementation follows a layered approach: database models → core services
     - Test session access from different device
     - _Requirements: All requirements_
 
-- [-] 20. Final checkpoint - Full system integration test
+- [x] 20. Final checkpoint - Full system integration test
   - Run all backend tests (property, unit, integration)
   - Run frontend in dev mode, test all user flows manually
   - Test WebSocket reconnection and state resync

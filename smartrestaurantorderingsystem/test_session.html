@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Session Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Backend API Test</h1>
+    <p>Testing connection to: <strong>http://10.163.23.62:8000</strong></p>
+    
+    <button onclick="testHealth()">Test Health Endpoint</button>
+    <button onclick="testSession()">Test Session Creation</button>
+    <button onclick="testMenu()">Test Menu Endpoint</button>
+    <button onclick="testCart()">Test Cart Endpoint</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_BASE = 'http://10.163.23.62:8000/api/v1';
+        const resultDiv = document.getElementById('result');
+
+        async function testHealth() {
+            try {
+                resultDiv.textContent = 'Testing health endpoint...';
+                const response = await fetch('http://10.163.23.62:8000/health');
+                const data = await response.json();
+                resultDiv.className = 'success';
+                resultDiv.textContent = 'Health Check SUCCESS:\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Health Check FAILED:\n' + error.message;
+            }
+        }
+
+        async function testSession() {
+            try {
+                resultDiv.textContent = 'Creating session...';
+                const response = await fetch(`${API_BASE}/sessions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        table_identifier: 'table-1',
+                        persistent_user_id: 'test-user-' + Date.now()
+                    })
+                });
+                const data = await response.json();
+                resultDiv.className = response.ok ? 'success' : 'error';
+                resultDiv.textContent = `Session Creation (${response.status}):\n` + JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Session Creation FAILED:\n' + error.message;
+            }
+        }
+
+        async function testMenu() {
+            try {
+                resultDiv.textContent = 'Fetching menu...';
+                const response = await fetch(`${API_BASE}/menu`);
+                const data = await response.json();
+                resultDiv.className = response.ok ? 'success' : 'error';
+                resultDiv.textContent = `Menu Fetch (${response.status}):\n` + JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Menu Fetch FAILED:\n' + error.message;
+            }
+        }
+
+        async function testCart() {
+            try {
+                resultDiv.textContent = 'Fetching cart...';
+                const response = await fetch(`${API_BASE}/cart`);
+                const data = await response.json();
+                resultDiv.className = response.ok ? 'success' : 'error';
+                resultDiv.textContent = `Cart Fetch (${response.status}):\n` + JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Cart Fetch FAILED:\n' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

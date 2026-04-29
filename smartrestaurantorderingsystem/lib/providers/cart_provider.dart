@@ -15,9 +15,12 @@ class CartNotifier extends StateNotifier<AsyncValue<CartResponse>> {
   Future<void> loadCart() async {
     state = const AsyncValue.loading();
     try {
+      print('Loading cart from API...');
       final cart = await _repository.getCart();
+      print('Cart loaded: ${cart.items.length} items, total: \$${cart.totalPrice}');
       state = AsyncValue.data(cart);
     } catch (e, stack) {
+      print('Error loading cart: $e');
       state = AsyncValue.error(e, stack);
     }
   }
@@ -25,11 +28,14 @@ class CartNotifier extends StateNotifier<AsyncValue<CartResponse>> {
   /// Add item to cart
   Future<void> addItem(int menuItemId, int quantity) async {
     try {
+      print('Adding item to cart: menuItemId=$menuItemId, quantity=$quantity');
       final cart = await _repository.addItem(
         CartItemAdd(menuItemId: menuItemId, quantity: quantity),
       );
+      print('Item added to cart: ${cart.items.length} items, total: \$${cart.totalPrice}');
       state = AsyncValue.data(cart);
     } catch (e, stack) {
+      print('Error adding item to cart: $e');
       state = AsyncValue.error(e, stack);
     }
   }
