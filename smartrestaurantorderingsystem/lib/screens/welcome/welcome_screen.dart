@@ -2,139 +2,196 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../staff/qr_generator_screen.dart';
 
-/// Welcome screen shown when no session exists
-/// Provides options to scan QR code or access staff features
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
-  // Default table for demo/testing
   static const String defaultTable = 'table-1';
-  // Production Firebase Hosting URL
   static const String baseUrl = 'https://smart-restaurant-app-2024.web.app';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Logo/Icon
-              Icon(
-                Icons.restaurant_menu,
-                size: 80,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(height: 16),
-
-              // Title
-              const Text(
-                'Smart Restaurant',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFE65100), Color(0xFFBF360C), Color(0xFF1A1A1A)],
+            stops: [0.0, 0.4, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              children: [
+                // Header
+                const SizedBox(height: 20),
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.restaurant,
+                    size: 50,
+                    color: Color(0xFFE65100),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-
-              // Subtitle
-              Text(
-                'Order from your table',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
+                const SizedBox(height: 20),
+                const Text(
+                  'Habesha Bites',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.5,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
+                const SizedBox(height: 8),
+                const Text(
+                  'Scan the QR code on your table\nto start ordering',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white70,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 40),
 
-              // Guest Instructions with QR Code
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                // QR Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 30,
+                        offset: const Offset(0, 15),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(28),
                   child: Column(
                     children: [
-                      const Text(
-                        'For Guests',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE65100).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.qr_code_scanner,
+                              color: Color(0xFFE65100),
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Table QR Code',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      
-                      // QR Code
+                      const SizedBox(height: 20),
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300, width: 2),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFE65100).withOpacity(0.3),
+                            width: 2,
+                          ),
                         ),
                         child: QrImageView(
                           data: '$baseUrl/?table=$defaultTable',
                           version: QrVersions.auto,
-                          size: 150,
+                          size: 180,
                           backgroundColor: Colors.white,
+                          eyeStyle: const QrEyeStyle(
+                            eyeShape: QrEyeShape.square,
+                            color: Color(0xFFE65100),
+                          ),
+                          dataModuleStyle: const QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.square,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE65100).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'Table: table-1',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFE65100),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      
                       const Text(
-                        'Scan this QR code with your phone camera to start ordering',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Table: $defaultTable',
+                        'Point your phone camera at this code',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Colors.grey,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 32),
 
-              // Staff Button
-              OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.push(
+                // Staff button
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => const QRGeneratorScreen(),
                     ),
-                  );
-                },
-                icon: const Icon(Icons.admin_panel_settings),
-                label: const Text('Staff: Generate QR Codes'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(12),
+                  ),
+                  icon: const Icon(Icons.admin_panel_settings,
+                      color: Colors.white70),
+                  label: const Text(
+                    'Staff Portal',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white30),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-
-              // Test Button (for development)
-              TextButton.icon(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/test-qr');
-                },
-                icon: const Icon(Icons.bug_report, size: 16),
-                label: const Text('Test Mode (Simulate QR Scan)'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.grey,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

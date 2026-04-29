@@ -29,10 +29,62 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Smart Restaurant',
+      title: 'Habesha Bites',
       theme: ThemeData(
-        primarySwatch: Colors.green,
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFE65100),
+          primary: const Color(0xFFE65100),
+          secondary: const Color(0xFF2E7D32),
+          surface: const Color(0xFFFFF8F5),
+          background: const Color(0xFFFFF8F5),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFE65100),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: false,
+          titleTextStyle: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: 0.5,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE65100),
+            foregroundColor: Colors.white,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        chipTheme: ChipThemeData(
+          selectedColor: const Color(0xFFE65100),
+          backgroundColor: Colors.white,
+          labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          side: const BorderSide(color: Color(0xFFE65100)),
+        ),
+        scaffoldBackgroundColor: const Color(0xFFFFF8F5),
+        fontFamily: 'Roboto',
       ),
       // Always start at '/' but pass the table ID we already extracted.
       home: SplashScreen(tableIdentifier: initialTableId),
