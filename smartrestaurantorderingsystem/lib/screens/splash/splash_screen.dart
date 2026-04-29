@@ -23,47 +23,29 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _initializeSession() async {
     try {
       if (widget.tableIdentifier != null && widget.tableIdentifier!.isNotEmpty) {
-        print('Creating session for table: ${widget.tableIdentifier}');
+        // QR code was scanned — create session for this table
         await ref.read(sessionProvider.notifier).createSession(widget.tableIdentifier!);
-        print('Session created successfully');
       } else {
-        print('Attempting to resume session');
+        // No QR code — try to resume an existing session only
         await ref.read(sessionProvider.notifier).resumeSession();
       }
     } catch (e) {
-      print('Session error (ignored): $e');
-      // Even if session fails, try to create a default one
-      try {
-        await ref.read(sessionProvider.notifier).createSession(
-          widget.tableIdentifier ?? 'table-1',
-        );
-      } catch (e2) {
-        print('Default session error (ignored): $e2');
-      }
+      print('Session error: $e');
     }
 
     await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
 
     final session = ref.read(sessionProvider);
-    print('Session state after init: $session');
 
     if (session != null) {
-      print('Going to menu');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MenuScreen()),
-      );
-    } else if (widget.tableIdentifier != null && widget.tableIdentifier!.isNotEmpty) {
-      // We had a table ID from QR scan but session failed — go to menu anyway
-      // The menu will show an error if the backend is unreachable
-      print('Session null but table ID present — going to menu anyway');
+      // Valid session → go to menu
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MenuScreen()),
       );
     } else {
-      print('No session, no table ID — showing welcome screen');
+      // No session → show welcome/QR screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const WelcomeScreen()),

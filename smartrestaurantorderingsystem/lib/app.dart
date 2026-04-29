@@ -25,6 +25,21 @@ class MyApp extends ConsumerWidget {
     String? initialTableId;
     if (kIsWeb) {
       initialTableId = Uri.base.queryParameters['table'];
+      // If URL path is /staff-login, go directly to staff login
+      if (Uri.base.path.contains('staff-login')) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Habesha Bites',
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFFE65100),
+              primary: const Color(0xFFE65100),
+            ),
+          ),
+          home: const StaffLoginScreen(),
+        );
+      }
     }
 
     return MaterialApp(
@@ -146,6 +161,11 @@ class MyApp extends ConsumerWidget {
             );
 
           case '/staff/login':
+            return MaterialPageRoute(
+              builder: (_) => const StaffLoginScreen(),
+            );
+
+          case '/staff-login':
             return MaterialPageRoute(
               builder: (_) => const StaffLoginScreen(),
             );
