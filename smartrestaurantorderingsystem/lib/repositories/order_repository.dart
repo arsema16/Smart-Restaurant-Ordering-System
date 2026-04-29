@@ -24,5 +24,4 @@ class OrderRepository {
   Future<OrderResponse> getOrder(String orderId) async {
     final response = await _api.get('/orders/$orderId');
     return OrderResponse.fromJson(response.data);
-  }
-}
+  }}
