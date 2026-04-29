@@ -123,7 +123,7 @@ class _MenuItemCard extends ConsumerWidget {
       child: ListTile(
         title: Text(item.name),
         subtitle: Text(
-          '\$${item.price.toStringAsFixed(2)} • ${item.prepTimeMinutes} min',
+          '${item.price.toStringAsFixed(2)} Birr • ${item.prepTimeMinutes} min',
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

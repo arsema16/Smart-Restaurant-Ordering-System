@@ -120,7 +120,7 @@ class OrderHistoryScreen extends ConsumerWidget {
                       Expanded(
                         child: Text('${item.quantity}x ${item.name}'),
                       ),
-                      Text('\$${(item.unitPrice * item.quantity).toStringAsFixed(2)}'),
+                      Text('${(item.unitPrice * item.quantity).toStringAsFixed(2)} Birr'),
                     ],
                   ),
                 )),
@@ -133,7 +133,7 @@ class OrderHistoryScreen extends ConsumerWidget {
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     Text(
-                      '\$${order.items.fold<double>(0, (sum, item) => sum + (item.unitPrice * item.quantity)).toStringAsFixed(2)}',
+                      '${order.items.fold<double>(0, (sum, item) => sum + (item.unitPrice * item.quantity)).toStringAsFixed(2)} Birr',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

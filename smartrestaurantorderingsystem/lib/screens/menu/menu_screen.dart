@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/menu_provider.dart';
 import '../../providers/cart_provider.dart';
-import '../../providers/recommendation_provider.dart';
 import '../../providers/websocket_provider.dart';
 import '../../models/menu_item_model.dart';
+import '../../utils/food_icons.dart';
 import '../cart/cart_screen.dart';
 import '../../widgets/recommendation_widget.dart';
 
@@ -35,7 +35,10 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Menu"),
+        title: const Text("Menu", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        elevation: 4,
         actions: [
           Stack(
             children: [
@@ -105,19 +108,42 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               // Category tabs
               if (categories.isNotEmpty)
                 Container(
-                  height: 50,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
                       final category = categories[index];
                       final isSelected = category == selectedCategory;
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
                         child: ChoiceChip(
-                          label: Text(category),
+                          label: Text(
+                            category,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: isSelected ? Colors.white : Colors.black87,
+                            ),
+                          ),
                           selected: isSelected,
+                          selectedColor: Colors.green,
+                          backgroundColor: Colors.white,
+                          elevation: isSelected ? 4 : 2,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           onSelected: (selected) {
                             setState(() {
                               selectedCategory = category;
@@ -174,37 +200,150 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   }
 
   Widget _buildMenuItem(MenuItemResponse item) {
+    final foodIcon = getFoodIcon(item.name);
+    final categoryColor = getCategoryColor(item.category);
+    
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: ListTile(
-        title: Text(
-          item.name,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: item.isAvailable ? Colors.black : Colors.grey,
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: item.isAvailable 
+                ? [Colors.white, categoryColor.withOpacity(0.1)]
+                : [Colors.grey.shade200, Colors.grey.shade300],
           ),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${item.price.toStringAsFixed(2)} Birr'),
-            Text('Prep time: ${item.prepTimeMinutes} min'),
-            if (!item.isAvailable)
-              const Text(
-                'Currently unavailable',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Item icon with colored background
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: item.isAvailable ? categoryColor.withOpacity(0.2) : Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: item.isAvailable ? categoryColor : Colors.grey.shade500,
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  foodIcon,
+                  size: 40,
+                  color: item.isAvailable ? categoryColor : Colors.grey.shade600,
+                ),
               ),
-          ],
-        ),
-        trailing: ElevatedButton.icon(
-          onPressed: item.isAvailable
-              ? () => _addToCart(item)
-              : null,
-          icon: const Icon(Icons.add_shopping_cart, size: 18),
-          label: const Text('Add'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: item.isAvailable ? Colors.green : Colors.grey,
-            foregroundColor: Colors.white,
+              const SizedBox(width: 16),
+              // Item details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: item.isAvailable ? Colors.black87 : Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: categoryColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: categoryColor, width: 1),
+                      ),
+                      child: Text(
+                        item.category,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: categoryColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          '${item.price.toStringAsFixed(2)} Birr',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${item.prepTimeMinutes} min',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (!item.isAvailable)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'Currently unavailable',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              // Add button
+              ElevatedButton(
+                onPressed: item.isAvailable ? () => _addToCart(item) : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: item.isAvailable ? categoryColor : Colors.grey,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: item.isAvailable ? 4 : 0,
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add_shopping_cart, size: 24),
+                    SizedBox(height: 4),
+                    Text('Add', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

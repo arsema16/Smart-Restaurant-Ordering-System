@@ -83,54 +83,170 @@ class MenuItem(BaseModel):
     prep_time_minutes: int
     is_available: bool
 
-# sample menu data
+# sample menu data with Ethiopian and international dishes
 menu_items = [
+    # Main Courses
     {
         "id": 1,
-        "name": "Burger",
-        "price": 150.0,
-        "category": "Main",
-        "prep_time_minutes": 15,
+        "name": "Doro Wat",
+        "price": 250.0,
+        "category": "Main Course",
+        "prep_time_minutes": 25,
         "is_available": True
     },
     {
         "id": 2,
-        "name": "Pizza",
-        "price": 200.0,
-        "category": "Main",
-        "prep_time_minutes": 20,
+        "name": "Kitfo",
+        "price": 280.0,
+        "category": "Main Course",
+        "prep_time_minutes": 15,
         "is_available": True
     },
     {
         "id": 3,
-        "name": "Pasta",
-        "price": 180.0,
-        "category": "Main",
-        "prep_time_minutes": 18,
+        "name": "Tibs",
+        "price": 220.0,
+        "category": "Main Course",
+        "prep_time_minutes": 20,
         "is_available": True
     },
     {
         "id": 4,
-        "name": "Coke",
+        "name": "Shiro Wat",
+        "price": 150.0,
+        "category": "Main Course",
+        "prep_time_minutes": 18,
+        "is_available": True
+    },
+    {
+        "id": 5,
+        "name": "Gomen",
+        "price": 120.0,
+        "category": "Main Course",
+        "prep_time_minutes": 15,
+        "is_available": True
+    },
+    {
+        "id": 6,
+        "name": "Burger",
+        "price": 180.0,
+        "category": "Fast Food",
+        "prep_time_minutes": 15,
+        "is_available": True
+    },
+    {
+        "id": 7,
+        "name": "Pizza Margherita",
+        "price": 250.0,
+        "category": "Fast Food",
+        "prep_time_minutes": 20,
+        "is_available": True
+    },
+    {
+        "id": 8,
+        "name": "Pasta Carbonara",
+        "price": 200.0,
+        "category": "Fast Food",
+        "prep_time_minutes": 18,
+        "is_available": True
+    },
+    {
+        "id": 9,
+        "name": "Fried Chicken",
+        "price": 190.0,
+        "category": "Fast Food",
+        "prep_time_minutes": 20,
+        "is_available": True
+    },
+    # Drinks
+    {
+        "id": 10,
+        "name": "Ethiopian Coffee",
         "price": 50.0,
+        "category": "Drinks",
+        "prep_time_minutes": 10,
+        "is_available": True
+    },
+    {
+        "id": 11,
+        "name": "Tej (Honey Wine)",
+        "price": 80.0,
+        "category": "Drinks",
+        "prep_time_minutes": 5,
+        "is_available": True
+    },
+    {
+        "id": 12,
+        "name": "Fresh Juice",
+        "price": 60.0,
+        "category": "Drinks",
+        "prep_time_minutes": 5,
+        "is_available": True
+    },
+    {
+        "id": 13,
+        "name": "Soft Drink",
+        "price": 40.0,
         "category": "Drinks",
         "prep_time_minutes": 2,
         "is_available": True
     },
     {
-        "id": 5,
-        "name": "Orange Juice",
-        "price": 60.0,
+        "id": 14,
+        "name": "Mineral Water",
+        "price": 30.0,
         "category": "Drinks",
+        "prep_time_minutes": 1,
+        "is_available": True
+    },
+    # Desserts
+    {
+        "id": 15,
+        "name": "Baklava",
+        "price": 90.0,
+        "category": "Desserts",
+        "prep_time_minutes": 5,
+        "is_available": True
+    },
+    {
+        "id": 16,
+        "name": "Ice Cream",
+        "price": 70.0,
+        "category": "Desserts",
         "prep_time_minutes": 3,
         "is_available": True
     },
     {
-        "id": 6,
-        "name": "Ice Cream",
-        "price": 70.0,
+        "id": 17,
+        "name": "Fruit Salad",
+        "price": 80.0,
         "category": "Desserts",
         "prep_time_minutes": 5,
+        "is_available": True
+    },
+    {
+        "id": 18,
+        "name": "Chocolate Cake",
+        "price": 100.0,
+        "category": "Desserts",
+        "prep_time_minutes": 5,
+        "is_available": True
+    },
+    # Appetizers
+    {
+        "id": 19,
+        "name": "Sambusa",
+        "price": 60.0,
+        "category": "Appetizers",
+        "prep_time_minutes": 10,
+        "is_available": True
+    },
+    {
+        "id": 20,
+        "name": "Salad",
+        "price": 70.0,
+        "category": "Appetizers",
+        "prep_time_minutes": 8,
         "is_available": True
     },
 ]
@@ -298,24 +414,32 @@ def update_cart_item(item_id: int, item: dict):
 # Recommendations endpoint
 @app.get("/api/v1/recommendations")
 def get_recommendations():
-    # Return some sample recommendations
+    # Return some sample recommendations (Ethiopian dishes and popular items)
     return [
         {
-            "id": 4,
-            "name": "Coke",
+            "id": 10,
+            "name": "Ethiopian Coffee",
             "price": 50.0,
             "category": "Drinks",
-            "prep_time_minutes": 2,
+            "prep_time_minutes": 10,
             "is_available": True
         },
         {
-            "id": 6,
-            "name": "Ice Cream",
-            "price": 70.0,
-            "category": "Desserts",
-            "prep_time_minutes": 5,
+            "id": 2,
+            "name": "Kitfo",
+            "price": 280.0,
+            "category": "Main Course",
+            "prep_time_minutes": 15,
             "is_available": True
-        }
+        },
+        {
+            "id": 19,
+            "name": "Sambusa",
+            "price": 60.0,
+            "category": "Appetizers",
+            "prep_time_minutes": 10,
+            "is_available": True
+        },
     ]
 
 # Orders endpoints

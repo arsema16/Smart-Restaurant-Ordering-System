@@ -1,8 +1,29 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 /// API configuration constants
 class ApiConstants {
-  // Base URL for the backend API
-  // Use localhost when running on the same computer
-  static const String baseUrl = 'http://localhost:8000';
+  // ─── PRODUCTION URL ────────────────────────────────────────────────────────
+  // Set this to your Railway backend URL after deploying.
+  // Leave empty to use the auto-detected URL (same host, port 8000).
+  static const String _productionBackendUrl = '';
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /// Returns the backend base URL.
+  /// • If [_productionBackendUrl] is set → use it (production deployment).
+  /// • On web → use the same host the Flutter app was served from, port 8000.
+  /// • On native → fall back to the PC's LAN IP.
+  static String get baseUrl {
+    if (_productionBackendUrl.isNotEmpty) {
+      return _productionBackendUrl;
+    }
+    if (kIsWeb) {
+      final host = Uri.base.host;
+      final scheme = Uri.base.scheme;
+      return '$scheme://$host:8000';
+    }
+    // Native fallback
+    return 'http://10.163.23.62:8000';
+  }
 
   // API version prefix
   static const String apiVersion = '/api/v1';
