@@ -18,22 +18,16 @@ class MenuScreen extends ConsumerStatefulWidget {
   ConsumerState<MenuScreen> createState() => _MenuScreenState();
 }
 
-class _MenuScreenState extends ConsumerState<MenuScreen>
-    with SingleTickerProviderStateMixin {
+class _MenuScreenState extends ConsumerState<MenuScreen> {
   String? selectedCategory;
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   List<MenuItemResponse> _searchResults = [];
   bool _isLoadingSearch = false;
-  late AnimationController _animController;
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(websocketProvider.notifier).connectGuest();
     });
@@ -42,7 +36,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   @override
   void dispose() {
     _searchController.dispose();
-    _animController.dispose();
     super.dispose();
   }
 
@@ -80,195 +73,180 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8F5),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverAppBar(
-            expandedHeight: _isSearching ? 80 : 140,
-            floating: true,
-            pinned: true,
-            snap: true,
-            backgroundColor: const Color(0xFFE65100),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFE65100), Color(0xFFBF360C)],
-                  ),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFE65100),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                cursorColor: Colors.white,
+                decoration: const InputDecoration(
+                  hintText: 'Search dishes...',
+                  hintStyle: TextStyle(color: Colors.white60),
+                  border: InputBorder.none,
                 ),
-                child: _isSearching
-                    ? const SizedBox()
-                    : SafeArea(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Habesha Bites 🍽️',
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'What would you like today?',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                onChanged: _performSearch,
+              )
+            : const Text(
+                'Habesha Bites 🍽️',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
-              title: _isSearching
-                  ? TextField(
-                      controller: _searchController,
-                      autofocus: true,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      cursorColor: Colors.white,
-                      decoration: const InputDecoration(
-                        hintText: 'Search dishes...',
-                        hintStyle: TextStyle(color: Colors.white60),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      onChanged: _performSearch,
-                    )
-                  : null,
-              titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
+        actions: [
+          if (!_isSearching)
+            IconButton(
+              icon: const Icon(Icons.search, size: 26),
+              onPressed: () => setState(() => _isSearching = true),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.close, size: 26),
+              onPressed: () => setState(() {
+                _isSearching = false;
+                _searchController.clear();
+                _searchResults = [];
+              }),
             ),
-            actions: [
-              if (!_isSearching)
-                IconButton(
-                  icon: const Icon(Icons.search, size: 26),
-                  onPressed: () => setState(() => _isSearching = true),
-                )
-              else
-                IconButton(
-                  icon: const Icon(Icons.close, size: 26),
-                  onPressed: () => setState(() {
-                    _isSearching = false;
-                    _searchController.clear();
-                    _searchResults = [];
-                  }),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_bag_outlined, size: 26),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CartScreen()),
                 ),
-              // Cart button with badge
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_bag_outlined, size: 26),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const CartScreen()),
+              ),
+              if (cartCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
                     ),
-                  ),
-                  if (cartCount > 0)
-                    Positioned(
-                      right: 6,
-                      top: 6,
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$cartCount',
-                            style: const TextStyle(
-                              color: Color(0xFFE65100),
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    child: Center(
+                      child: Text(
+                        '$cartCount',
+                        style: const TextStyle(
+                          color: Color(0xFFE65100),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(width: 4),
+                  ),
+                ),
             ],
           ),
+          const SizedBox(width: 4),
         ],
-        body: _isSearching && _searchController.text.isNotEmpty
-            ? _buildSearchResults()
-            : menuAsync.when(
-                data: (menu) {
-                  final categories = menu.categories.keys.toList();
-                  if (selectedCategory == null && categories.isNotEmpty) {
-                    selectedCategory = categories.first;
-                  }
-                  return _buildMenuBody(menu, categories);
-                },
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: Color(0xFFE65100)),
-                ),
-                error: (error, _) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      const Text('Could not load menu',
-                          style: TextStyle(fontSize: 18, color: Colors.grey)),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () =>
-                            ref.read(menuProvider.notifier).loadMenu(),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
+      ),
+      body: _isSearching && _searchController.text.isNotEmpty
+          ? _buildSearchResults()
+          : menuAsync.when(
+              data: (menu) {
+                final categories = menu.categories.keys.toList();
+                if (selectedCategory == null && categories.isNotEmpty) {
+                  selectedCategory = categories.first;
+                }
+                return _buildMenuBody(menu, categories);
+              },
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: Color(0xFFE65100)),
+              ),
+              error: (error, _) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    const Text('Could not load menu',
+                        style: TextStyle(fontSize: 18, color: Colors.grey)),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () =>
+                          ref.read(menuProvider.notifier).loadMenu(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
-      ),
+            ),
     );
   }
 
   Widget _buildMenuBody(MenuGroupedResponse menu, List<String> categories) {
-    return CustomScrollView(
-      slivers: [
+    final items = menu.categories[selectedCategory] ?? [];
+    return Column(
+      children: [
         // Recommendations
-        const SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: RecommendationWidget(),
-          ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: RecommendationWidget(),
         ),
 
         // Category chips
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _CategoryHeaderDelegate(
-            categories: categories,
-            selectedCategory: selectedCategory,
-            onCategorySelected: (cat) =>
-                setState(() => selectedCategory = cat),
+        Container(
+          height: 56,
+          color: const Color(0xFFFFF8F5),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final cat = categories[index];
+              final isSelected = cat == selectedCategory;
+              final color = getCategoryColor(cat);
+              return GestureDetector(
+                onTap: () => setState(() => selectedCategory = cat),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.only(right: 10),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 18, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isSelected ? color : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? color : Colors.grey.shade300,
+                      width: 1.5,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: color.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            )
+                          ]
+                        : [],
+                  ),
+                  child: Text(
+                    cat,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: isSelected ? Colors.white : Colors.grey.shade700,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
 
-        // Menu items
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final items = menu.categories[selectedCategory] ?? [];
-                if (index >= items.length) return null;
-                return _buildMenuCard(items[index]);
-              },
-              childCount: (menu.categories[selectedCategory] ?? []).length,
-            ),
+        // Menu items list
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+            itemCount: items.length,
+            itemBuilder: (context, index) => _buildMenuCard(items[index]),
           ),
         ),
       ],
@@ -321,8 +299,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                   ),
                   const SizedBox(height: 4),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: item.isAvailable
                           ? categoryColor.withOpacity(0.2)
@@ -395,7 +373,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                             decoration: BoxDecoration(
                               color: Colors.red.shade50,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.red.shade200),
+                              border:
+                                  Border.all(color: Colors.red.shade200),
                             ),
                             child: const Text(
                               'Unavailable',
@@ -479,85 +458,10 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
         ),
         backgroundColor: const Color(0xFF2E7D32),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 1),
       ),
     );
   }
-}
-
-// Sticky category header delegate
-class _CategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final List<String> categories;
-  final String? selectedCategory;
-  final ValueChanged<String> onCategorySelected;
-
-  _CategoryHeaderDelegate({
-    required this.categories,
-    required this.selectedCategory,
-    required this.onCategorySelected,
-  });
-
-  @override
-  double get minExtent => 60;
-  @override
-  double get maxExtent => 60;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: const Color(0xFFFFF8F5),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final cat = categories[index];
-          final isSelected = cat == selectedCategory;
-          final color = getCategoryColor(cat);
-          return GestureDetector(
-            onTap: () => onCategorySelected(cat),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 10),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected ? color : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected ? color : Colors.grey.shade300,
-                  width: 1.5,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: color.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        )
-                      ]
-                    : [],
-              ),
-              child: Text(
-                cat,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                  color: isSelected ? Colors.white : Colors.grey.shade700,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(_CategoryHeaderDelegate oldDelegate) =>
-      oldDelegate.selectedCategory != selectedCategory ||
-      oldDelegate.categories != categories;
 }

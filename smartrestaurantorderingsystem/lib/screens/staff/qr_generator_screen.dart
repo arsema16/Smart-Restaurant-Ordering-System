@@ -13,10 +13,8 @@ class _QRGeneratorScreenState extends State<QRGeneratorScreen> {
   final TextEditingController _tableController = TextEditingController();
   String? _generatedUrl;
 
-  // Base URL of your web app
-  // For local development, use your local IP address
-  // For production, use your actual domain
-  static const String baseUrl = 'http://10.163.23.62:8080'; // Your computer's IP address
+  // Base URL of the deployed web app
+  static const String baseUrl = 'https://smart-restaurant-app-2024.web.app';
 
   void _generateQRCode() {
     final tableId = _tableController.text.trim();
