@@ -22,44 +22,48 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   Future<void> _initializeSession() async {
     try {
-      // If table identifier is provided (from QR code URL), create new session
       if (widget.tableIdentifier != null && widget.tableIdentifier!.isNotEmpty) {
         print('Creating session for table: ${widget.tableIdentifier}');
         await ref.read(sessionProvider.notifier).createSession(widget.tableIdentifier!);
         print('Session created successfully');
       } else {
-        // Otherwise, try to resume existing session
         print('Attempting to resume session');
         await ref.read(sessionProvider.notifier).resumeSession();
       }
-      
-      // Wait a bit for the UI
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (!mounted) return;
-
-      final session = ref.read(sessionProvider);
-      print('Session state: $session');
-      
-      if (session != null) {
-        // Has session, go to menu
-        print('Navigating to menu screen');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MenuScreen()),
-        );
-      } else {
-        // No session and no table ID, show welcome screen
-        print('No session, showing welcome screen');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-        );
-      }
     } catch (e) {
-      print('ERROR in _initializeSession: $e');
-      if (!mounted) return;
-      // On error, show welcome screen
+      print('Session error (ignored): $e');
+      // Even if session fails, try to create a default one
+      try {
+        await ref.read(sessionProvider.notifier).createSession(
+          widget.tableIdentifier ?? 'table-1',
+        );
+      } catch (e2) {
+        print('Default session error (ignored): $e2');
+      }
+    }
+
+    await Future.delayed(const Duration(seconds: 1));
+    if (!mounted) return;
+
+    final session = ref.read(sessionProvider);
+    print('Session state after init: $session');
+
+    if (session != null) {
+      print('Going to menu');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MenuScreen()),
+      );
+    } else if (widget.tableIdentifier != null && widget.tableIdentifier!.isNotEmpty) {
+      // We had a table ID from QR scan but session failed — go to menu anyway
+      // The menu will show an error if the backend is unreachable
+      print('Session null but table ID present — going to menu anyway');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MenuScreen()),
+      );
+    } else {
+      print('No session, no table ID — showing welcome screen');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const WelcomeScreen()),

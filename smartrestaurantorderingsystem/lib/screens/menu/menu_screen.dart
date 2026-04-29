@@ -5,9 +5,11 @@ import '../../providers/menu_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/websocket_provider.dart';
 import '../../models/menu_item_model.dart';
+import '../../repositories/menu_repository.dart';
 import '../../utils/food_icons.dart';
 import '../cart/cart_screen.dart';
 import '../../widgets/recommendation_widget.dart';
+import '../../providers/api_provider.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
@@ -18,14 +20,38 @@ class MenuScreen extends ConsumerStatefulWidget {
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
   String? selectedCategory;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  List<MenuItemResponse> _searchResults = [];
+  bool _isLoadingSearch = false;
 
   @override
   void initState() {
     super.initState();
-    // Connect to WebSocket for real-time updates
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(websocketProvider.notifier).connectGuest();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _performSearch(String query) async {
+    if (query.isEmpty) {
+      setState(() { _searchResults = []; _isLoadingSearch = false; });
+      return;
+    }
+    setState(() => _isLoadingSearch = true);
+    try {
+      final repo = ref.read(menuRepositoryProvider);
+      final results = await repo.searchMenu(query);
+      setState(() { _searchResults = results; _isLoadingSearch = false; });
+    } catch (_) {
+      setState(() => _isLoadingSearch = false);
+    }
   }
 
   @override
@@ -35,11 +61,37 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Menu", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                cursorColor: Colors.white,
+                decoration: const InputDecoration(
+                  hintText: 'Search food...',
+                  hintStyle: TextStyle(color: Colors.white70),
+                  border: InputBorder.none,
+                ),
+                onChanged: _performSearch,
+              )
+            : const Text("Menu", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         elevation: 4,
         actions: [
+          // Search toggle
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  _searchResults = [];
+                }
+              });
+            },
+          ),
           Stack(
             children: [
               IconButton(
@@ -89,7 +141,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           )
         ],
       ),
-      body: menuAsync.when(
+      body: _isSearching && _searchController.text.isNotEmpty
+          ? _buildSearchResults()
+          : menuAsync.when(
         data: (menu) {
           final categories = menu.categories.keys.toList();
           
@@ -356,7 +410,34 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       SnackBar(
         content: Text('${item.name} added to cart'),
         duration: const Duration(seconds: 1),
+        backgroundColor: Colors.green,
       ),
+    );
+  }
+
+  Widget _buildSearchResults() {
+    if (_isLoadingSearch) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+            const SizedBox(height: 16),
+            Text(
+              'No results for "${_searchController.text}"',
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.all(8),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) => _buildMenuItem(_searchResults[index]),
     );
   }
 }

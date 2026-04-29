@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/menu/menu_screen.dart';
@@ -18,6 +19,14 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // On web, read the table parameter directly from the browser URL at startup.
+    // Flutter's onGenerateRoute does NOT receive the initial query string, so
+    // we grab it from Uri.base before the router is even involved.
+    String? initialTableId;
+    if (kIsWeb) {
+      initialTableId = Uri.base.queryParameters['table'];
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Smart Restaurant',
@@ -25,33 +34,32 @@ class MyApp extends ConsumerWidget {
         primarySwatch: Colors.green,
         useMaterial3: true,
       ),
-      initialRoute: '/',
+      // Always start at '/' but pass the table ID we already extracted.
+      home: SplashScreen(tableIdentifier: initialTableId),
       onGenerateRoute: (settings) {
-        // Extract query parameters from the URL
+        // Extract query parameters from the URL for in-app navigation
         final uri = Uri.parse(settings.name ?? '/');
         final path = uri.path.isEmpty ? '/' : uri.path;
         final queryParams = uri.queryParameters;
-        
-        // Handle routes with authentication and session guards
+
         switch (path) {
           case '/':
-            // Check if there's a table parameter in the URL (from QR code)
-            final tableId = queryParams['table'] ?? (settings.arguments as Map<String, dynamic>?)?['table'];
+            final tableId = queryParams['table'] ??
+                (settings.arguments as Map<String, dynamic>?)?['table'];
             return MaterialPageRoute(
               builder: (_) => SplashScreen(tableIdentifier: tableId),
             );
-          
+
           case '/welcome':
             return MaterialPageRoute(
               builder: (_) => const WelcomeScreen(),
             );
-          
+
           case '/test-qr':
             return MaterialPageRoute(
               builder: (_) => const TestQRScreen(),
             );
-          
-          // Guest routes - require session
+
           case '/menu':
             return MaterialPageRoute(
               builder: (_) => _SessionGuard(
@@ -59,7 +67,7 @@ class MyApp extends ConsumerWidget {
                 ref: ref,
               ),
             );
-          
+
           case '/cart':
             return MaterialPageRoute(
               builder: (_) => _SessionGuard(
@@ -67,7 +75,7 @@ class MyApp extends ConsumerWidget {
                 ref: ref,
               ),
             );
-          
+
           case '/orders':
             return MaterialPageRoute(
               builder: (_) => _SessionGuard(
@@ -75,9 +83,8 @@ class MyApp extends ConsumerWidget {
                 ref: ref,
               ),
             );
-          
+
           case '/orders/tracking':
-            // Extract orderId from route settings
             final orderId = settings.arguments as String? ?? '';
             return MaterialPageRoute(
               builder: (_) => _SessionGuard(
@@ -85,13 +92,12 @@ class MyApp extends ConsumerWidget {
                 ref: ref,
               ),
             );
-          
-          // Staff routes - require authentication
+
           case '/staff/login':
             return MaterialPageRoute(
               builder: (_) => const StaffLoginScreen(),
             );
-          
+
           case '/staff/dashboard':
             return MaterialPageRoute(
               builder: (_) => _AuthGuard(
@@ -99,12 +105,12 @@ class MyApp extends ConsumerWidget {
                 ref: ref,
               ),
             );
-          
+
           case '/staff/qr-generator':
             return MaterialPageRoute(
               builder: (_) => const QRGeneratorScreen(),
             );
-          
+
           default:
             return MaterialPageRoute(
               builder: (_) => const WelcomeScreen(),
