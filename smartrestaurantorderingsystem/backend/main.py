@@ -277,3 +277,38 @@ def update_order_status(order_id: str, body: dict):
         raise HTTPException(status_code=400, detail="Invalid status")
     orders[order_id]["status"] = new_status
     return orders[order_id]
+
+
+@app.get("/api/v1/staff/menu")
+def get_staff_menu():
+    return menu_items
+
+@app.post("/api/v1/staff/menu")
+def create_menu_item(item: dict):
+    new_id = max(m["id"] for m in menu_items) + 1
+    new_item = {
+        "id": new_id,
+        "name": item.get("name", ""),
+        "price": float(item.get("price", 0)),
+        "category": item.get("category", "Main Course"),
+        "prep_time_minutes": int(item.get("prep_time_minutes", 15)),
+        "is_available": True,
+    }
+    menu_items.append(new_item)
+    return new_item
+
+@app.put("/api/v1/staff/menu/{item_id}")
+def update_menu_item(item_id: int, item: dict):
+    menu_item = next((m for m in menu_items if m["id"] == item_id), None)
+    if not menu_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    menu_item.update({k: v for k, v in item.items() if k != "id"})
+    return menu_item
+
+@app.patch("/api/v1/staff/menu/{item_id}/availability")
+def toggle_availability(item_id: int, body: dict):
+    menu_item = next((m for m in menu_items if m["id"] == item_id), None)
+    if not menu_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    menu_item["is_available"] = body.get("is_available", not menu_item["is_available"])
+    return menu_item
