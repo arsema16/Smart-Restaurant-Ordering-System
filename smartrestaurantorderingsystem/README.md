@@ -4,7 +4,7 @@ A full-stack digital restaurant ordering system where customers scan a QR code a
 
 **Live Demo**
 - Frontend: https://smart-restaurant-app-2024.web.app
-- Backend API: https://smart-restaurant-ordering-system-production.up.railway.app
+- Backend API: https://smart-restaurant-ordering-system-kos8.onrender.com
 - GitHub: https://github.com/arsema16/Smart-Restaurant-Ordering-System
 
 ---
