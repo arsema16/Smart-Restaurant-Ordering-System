@@ -27,11 +27,18 @@ class MyApp extends ConsumerWidget {
       ),
       initialRoute: '/',
       onGenerateRoute: (settings) {
+        // Extract query parameters from the URL
+        final uri = Uri.parse(settings.name ?? '/');
+        final path = uri.path.isEmpty ? '/' : uri.path;
+        final queryParams = uri.queryParameters;
+        
         // Handle routes with authentication and session guards
-        switch (settings.name) {
+        switch (path) {
           case '/':
+            // Check if there's a table parameter in the URL (from QR code)
+            final tableId = queryParams['table'] ?? (settings.arguments as Map<String, dynamic>?)?['table'];
             return MaterialPageRoute(
-              builder: (_) => const SplashScreen(),
+              builder: (_) => SplashScreen(tableIdentifier: tableId),
             );
           
           case '/welcome':
@@ -70,9 +77,11 @@ class MyApp extends ConsumerWidget {
             );
           
           case '/orders/tracking':
+            // Extract orderId from route settings
+            final orderId = settings.arguments as String? ?? '';
             return MaterialPageRoute(
               builder: (_) => _SessionGuard(
-                child: const OrderTrackingScreen(),
+                child: OrderTrackingScreen(orderId: orderId),
                 ref: ref,
               ),
             );

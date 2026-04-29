@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import json
 
 
 class Settings(BaseSettings):
@@ -20,8 +21,8 @@ class Settings(BaseSettings):
     app_name: str = "Smart Restaurant Ordering System"
     debug: bool = False
     
-    # CORS
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    # CORS - allow all origins for development
+    cors_origins: list[str] = ["*"]
     
     model_config = SettingsConfigDict(
         env_file=".env",
