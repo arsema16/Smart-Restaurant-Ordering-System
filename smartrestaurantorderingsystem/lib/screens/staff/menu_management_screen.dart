@@ -318,9 +318,9 @@ class _MenuItemDialogState extends ConsumerState<_MenuItemDialog> {
               TextFormField(
                 controller: _priceController,
                 decoration: const InputDecoration(
-                  labelText: 'Price',
+                  labelText: 'Price (Birr)',
                   border: OutlineInputBorder(),
-                  prefixText: '\$',
+                  suffixText: 'Birr',
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
