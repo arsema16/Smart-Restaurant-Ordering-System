@@ -5,7 +5,7 @@ class ApiConstants {
   // ─── PRODUCTION URL ────────────────────────────────────────────────────────
   // Set this to your Railway backend URL after deploying.
   // Leave empty to use the auto-detected URL (same host, port 8000).
-  static const String _productionBackendUrl = '';
+  static const String _productionBackendUrl = 'https://smart-restaurant-ordering-system-production.up.railway.app';
   // ───────────────────────────────────────────────────────────────────────────
 
   /// Returns the backend base URL.

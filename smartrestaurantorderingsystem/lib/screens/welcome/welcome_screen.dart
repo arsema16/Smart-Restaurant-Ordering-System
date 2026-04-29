@@ -9,8 +9,8 @@ class WelcomeScreen extends StatelessWidget {
 
   // Default table for demo/testing
   static const String defaultTable = 'table-1';
-  // Use your computer's IP address so phones on the same network can access it
-  static const String baseUrl = 'http://10.163.23.62:8080';
+  // Production Firebase Hosting URL
+  static const String baseUrl = 'https://smart-restaurant-app-2024.web.app';
 
   @override
   Widget build(BuildContext context) {
